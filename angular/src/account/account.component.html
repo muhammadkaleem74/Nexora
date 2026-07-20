@@ -1,17 +1,22 @@
-﻿<div class="login-box">
-    <account-header></account-header>
-    <div class="card">
-        @if (showTenantChange()) {
-            <div class="card-header">
-                <tenant-change></tenant-change>
+<div class="nx-auth-page">
+    <div class="nx-auth-box">
+        <div class="nx-auth-logo">
+            <div style="display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--nx-text);">
+                <div style="width:36px; height:36px; background:var(--nx-accent); border-radius:9px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; color:white; letter-spacing:-0.02em;">N</div>
+                <span style="font-size:18px; font-weight:700; color:var(--nx-text); letter-spacing:-0.02em;">Nexora</span>
             </div>
-        }
-        <div class="card-body login-card-body">
+        </div>
+        <div class="nx-auth-card">
+            @if (showTenantChange()) {
+                <div class="nx-tenant-label">
+                    <tenant-change></tenant-change>
+                </div>
+            }
             <router-outlet></router-outlet>
         </div>
-        <div class="card-footer">
+        <div class="nx-auth-bottom">
+            <account-footer></account-footer>
             <account-languages></account-languages>
         </div>
     </div>
-    <account-footer></account-footer>
 </div>

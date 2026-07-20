@@ -1,282 +1,176 @@
-﻿<div [@routerTransition]>
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <h1>{{ 'HomePage' | localize }}</h1>
-                </div>
+<div [@routerTransition]>
+
+    <!-- Page Header -->
+    <div class="nx-page-header">
+        <div>
+            <h1 class="nx-page-title">{{ 'HomePage' | localize }}</h1>
+            <p class="nx-page-subtitle">Platform overview and key metrics</p>
+        </div>
+    </div>
+
+    <!-- Primary Metric Cards -->
+    <div class="nx-metrics-grid">
+        <div class="nx-metric-card">
+            <div class="nx-metric-icon nx-metric-icon--green">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="nx-metric-body">
+                <p class="nx-metric-label">Stargazers</p>
+                <p class="nx-metric-value">8.2k+</p>
             </div>
         </div>
-    </section>
-    <section class="content px-2">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="alert alert-info alert-dismissible">
-                        <h6>
-                            <i class="icon fa fa-info"></i>
-                            This is a sample Dashboard which doesn't show any server side data. However, you can develop
-                            your own dashboard inspired by this one and its source code.
-                        </h6>
-                    </div>
-                </div>
+        <div class="nx-metric-card">
+            <div class="nx-metric-icon nx-metric-icon--blue">
+                <i class="fas fa-users"></i>
             </div>
-            <div class="row">
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-success">
-                        <div class="inner">
-                            <h3>8.2k+</h3>
-                            <p>Stargazers</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <a
-                            href="https://github.com/aspnetboilerplate/aspnetboilerplate/stargazers"
-                            class="small-box-footer"
-                            target="_blank">
-                            More info
-                            <i class="fas fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>140+</h3>
-                            <p>Contributors</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <a
-                            href="https://github.com/aspnetboilerplate/aspnetboilerplate/graphs/contributors"
-                            class="small-box-footer"
-                            target="_blank">
-                            More info
-                            <i class="fas fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-warning">
-                        <div class="inner">
-                            <h3>1.6k+</h3>
-                            <p>Used / Dependents</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fas fa-tools"></i>
-                        </div>
-                        <a
-                            href="https://github.com/aspnetboilerplate/aspnetboilerplate/network/dependents"
-                            class="small-box-footer"
-                            target="_blank">
-                            More info
-                            <i class="fas fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-primary">
-                        <div class="inner">
-                            <h3>3.1k+</h3>
-                            <p>Forks</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fas fa-code"></i>
-                        </div>
-                        <a
-                            href="https://github.com/aspnetboilerplate/aspnetboilerplate/network/members"
-                            class="small-box-footer"
-                            target="_blank">
-                            More info
-                            <i class="fas fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-primary elevation-1">
-                            <i class="fas fa-plus-circle"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Commits</span>
-                            <span class="info-box-number">6,350+</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box mb-3">
-                        <span class="info-box-icon bg-warning elevation-1">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Issues</span>
-                            <span class="info-box-number">170+</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="clearfix hidden-md-up"></div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box mb-3">
-                        <span class="info-box-icon bg-info elevation-1">
-                            <i class="fas fa-tag"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Releases</span>
-                            <span class="info-box-number">200+</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box mb-3">
-                        <span class="info-box-icon bg-success elevation-1">
-                            <i class="fas fa-eye"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Watching by</span>
-                            <span class="info-box-number">810+</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Open Issues</h3>
-                        </div>
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover text-nowrap">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th>Id</th>
-                                        <th class="w-25">Title</th>
-                                        <th class="w-25">Labels</th>
-                                        <th>Date</th>
-                                        <th>Opened by</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <a
-                                                href="https://github.com/aspnetboilerplate/aspnetboilerplate/issues/5452"
-                                                target="_blank">
-                                                5452
-                                            </a>
-                                        </td>
-                                        <td>Angular UI migration to AdminLTE 3</td>
-                                        <td>
-                                            <span class="badge badge-secondary mx-1">module-zero-core-template</span>
-                                            <span class="badge badge-primary mx-1">feature</span>
-                                        </td>
-                                        <td>11 days ago</td>
-                                        <td>iyilm4z</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a
-                                                href="https://github.com/aspnetboilerplate/aspnetboilerplate/issues/5391"
-                                                target="_blank">
-                                                5391
-                                            </a>
-                                        </td>
-                                        <td>AbpCacheBase should lock the same object for sync and async</td>
-                                        <td>
-                                            <span class="badge badge-danger mx-1">bug</span>
-                                            <span class="badge badge-success mx-1">pull request candidate</span>
-                                        </td>
-                                        <td>26 days ago</td>
-                                        <td>acjh</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a
-                                                href="https://github.com/aspnetboilerplate/aspnetboilerplate/issues/5390"
-                                                target="_blank">
-                                                5390
-                                            </a>
-                                        </td>
-                                        <td>AbpCache sliding/absolute expire time</td>
-                                        <td>
-                                            <span class="badge badge-warning mx-1">breaking-change</span>
-                                            <span class="badge badge-info mx-1">enhancement</span>
-                                        </td>
-                                        <td>27 days ago</td>
-                                        <td>ryancyq</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Closed Pull Requests</h3>
-                        </div>
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover text-nowrap">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th>Id</th>
-                                        <th class="w-25">Title</th>
-                                        <th class="w-25">Milestone</th>
-                                        <th>Date</th>
-                                        <th>Made by</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <a
-                                                href="https://github.com/aspnetboilerplate/aspnetboilerplate/pull/5430"
-                                                target="_blank">
-                                                5430
-                                            </a>
-                                        </td>
-                                        <td>Added Dynamic-Parameter-System doc to documentation menu</td>
-                                        <td>v5.6</td>
-                                        <td>18 days ago</td>
-                                        <td>maliming</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a
-                                                href="https://github.com/aspnetboilerplate/aspnetboilerplate/pull/5362"
-                                                target="_blank">
-                                                5362
-                                            </a>
-                                        </td>
-                                        <td>Dynamic Parameter Module</td>
-                                        <td>v5.4</td>
-                                        <td>25 days ago</td>
-                                        <td>demirmusa</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a
-                                                href="https://github.com/aspnetboilerplate/aspnetboilerplate/pull/4924"
-                                                target="_blank">
-                                                4924
-                                            </a>
-                                        </td>
-                                        <td>ASP.NET Core 3.0 Upgrade</td>
-                                        <td>v5.0</td>
-                                        <td>Oct 15</td>
-                                        <td>ismcagdas</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+            <div class="nx-metric-body">
+                <p class="nx-metric-label">Contributors</p>
+                <p class="nx-metric-value">140+</p>
             </div>
         </div>
-    </section>
+        <div class="nx-metric-card">
+            <div class="nx-metric-icon nx-metric-icon--amber">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="nx-metric-body">
+                <p class="nx-metric-label">Dependents</p>
+                <p class="nx-metric-value">1.6k+</p>
+            </div>
+        </div>
+        <div class="nx-metric-card">
+            <div class="nx-metric-icon nx-metric-icon--violet">
+                <i class="fas fa-code-branch"></i>
+            </div>
+            <div class="nx-metric-body">
+                <p class="nx-metric-label">Forks</p>
+                <p class="nx-metric-value">3.1k+</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="nx-stats-grid">
+        <div class="nx-stat-card">
+            <div class="nx-stat-icon nx-stat-icon--blue">
+                <i class="fas fa-code-commit"></i>
+            </div>
+            <div>
+                <p class="nx-stat-label">Commits</p>
+                <p class="nx-stat-value">6,350+</p>
+            </div>
+        </div>
+        <div class="nx-stat-card">
+            <div class="nx-stat-icon nx-stat-icon--amber">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div>
+                <p class="nx-stat-label">Open Issues</p>
+                <p class="nx-stat-value">170+</p>
+            </div>
+        </div>
+        <div class="nx-stat-card">
+            <div class="nx-stat-icon nx-stat-icon--teal">
+                <i class="fas fa-tag"></i>
+            </div>
+            <div>
+                <p class="nx-stat-label">Releases</p>
+                <p class="nx-stat-value">200+</p>
+            </div>
+        </div>
+        <div class="nx-stat-card">
+            <div class="nx-stat-icon nx-stat-icon--violet">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div>
+                <p class="nx-stat-label">Watching</p>
+                <p class="nx-stat-value">810+</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables -->
+    <div class="nx-grid-2">
+
+        <!-- Open Issues -->
+        <div class="nx-card">
+            <div class="nx-card__header">
+                <span class="nx-card__title">Open Issues</span>
+                <span class="nx-badge nx-badge--amber">3 open</span>
+            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding:9px 16px; font-size:11px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:0.06em; background:var(--nx-bg); border-bottom:1px solid var(--nx-border); text-align:left;">#</th>
+                        <th style="padding:9px 16px; font-size:11px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:0.06em; background:var(--nx-bg); border-bottom:1px solid var(--nx-border); text-align:left;">Title</th>
+                        <th style="padding:9px 16px; font-size:11px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:0.06em; background:var(--nx-bg); border-bottom:1px solid var(--nx-border); text-align:left;">Author</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">
+                            <a href="https://github.com/aspnetboilerplate/aspnetboilerplate/issues/5452" target="_blank" style="color:var(--nx-accent-text); font-weight:500; text-decoration:none;">#5452</a>
+                        </td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text);">Angular UI migration to AdminLTE 3</td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">iyilm4z</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">
+                            <a href="https://github.com/aspnetboilerplate/aspnetboilerplate/issues/5391" target="_blank" style="color:var(--nx-accent-text); font-weight:500; text-decoration:none;">#5391</a>
+                        </td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text);">AbpCacheBase should lock the same object for sync and async</td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">acjh</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:11px 16px; font-size:13px; color:var(--nx-text-muted);">
+                            <a href="https://github.com/aspnetboilerplate/aspnetboilerplate/issues/5390" target="_blank" style="color:var(--nx-accent-text); font-weight:500; text-decoration:none;">#5390</a>
+                        </td>
+                        <td style="padding:11px 16px; font-size:13px; color:var(--nx-text);">AbpCache sliding/absolute expire time</td>
+                        <td style="padding:11px 16px; font-size:13px; color:var(--nx-text-muted);">ryancyq</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Closed Pull Requests -->
+        <div class="nx-card">
+            <div class="nx-card__header">
+                <span class="nx-card__title">Closed Pull Requests</span>
+                <span class="nx-badge nx-badge--green">merged</span>
+            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding:9px 16px; font-size:11px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:0.06em; background:var(--nx-bg); border-bottom:1px solid var(--nx-border); text-align:left;">#</th>
+                        <th style="padding:9px 16px; font-size:11px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:0.06em; background:var(--nx-bg); border-bottom:1px solid var(--nx-border); text-align:left;">Title</th>
+                        <th style="padding:9px 16px; font-size:11px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:0.06em; background:var(--nx-bg); border-bottom:1px solid var(--nx-border); text-align:left;">Author</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">
+                            <a href="https://github.com/aspnetboilerplate/aspnetboilerplate/pull/5430" target="_blank" style="color:var(--nx-accent-text); font-weight:500; text-decoration:none;">#5430</a>
+                        </td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text);">Added Dynamic-Parameter-System doc to menu</td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">maliming</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">
+                            <a href="https://github.com/aspnetboilerplate/aspnetboilerplate/pull/5362" target="_blank" style="color:var(--nx-accent-text); font-weight:500; text-decoration:none;">#5362</a>
+                        </td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text);">Dynamic Parameter Module</td>
+                        <td style="padding:11px 16px; font-size:13px; border-bottom:1px solid var(--nx-border-light); color:var(--nx-text-muted);">demirmusa</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:11px 16px; font-size:13px; color:var(--nx-text-muted);">
+                            <a href="https://github.com/aspnetboilerplate/aspnetboilerplate/pull/4924" target="_blank" style="color:var(--nx-accent-text); font-weight:500; text-decoration:none;">#4924</a>
+                        </td>
+                        <td style="padding:11px 16px; font-size:13px; color:var(--nx-text);">ASP.NET Core 3.0 Upgrade</td>
+                        <td style="padding:11px 16px; font-size:13px; color:var(--nx-text-muted);">ismcagdas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
 </div>

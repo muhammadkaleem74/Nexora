@@ -1,12 +1,10 @@
-﻿<div class="text-center">
+<div style="display:flex; gap:8px; align-items:center;">
     @for (language of languages; track language) {
         @if (language.name != currentLanguage.name) {
-            <a href="javascript:void(0);" (click)="changeLanguage(language.name)">
-                <span
-                    title="{{ language.displayName }}"
-                    [attr.class.current-language-icon]="language.name != currentLanguage.name">
-                    <i class="d-inline-block mx-1 {{ language.icon }}"></i>
-                </span>
+            <a href="javascript:void(0);" (click)="changeLanguage(language.name)"
+               style="color:var(--nx-text-subtle); font-size:12px; text-decoration:none; display:flex; align-items:center; gap:4px;"
+               [title]="language.displayName">
+                <i class="{{ language.icon }}"></i>
             </a>
         }
     }

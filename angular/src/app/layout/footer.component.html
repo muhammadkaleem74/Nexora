@@ -1,11 +1,9 @@
-<footer class="main-footer">
-    <strong>
-        Copyright &copy; {{ currentYear }}
+<footer class="nx-footer">
+    <span>
+        &copy; {{ currentYear }}
         <a href="javascript:;">Nexora</a>
-        .
-    </strong>
-    <div class="float-right d-none d-sm-inline-block">
-        <b>{{ 'Version' | localize }}</b>
-        {{ versionText }}
-    </div>
+    </span>
+    <span>
+        {{ 'Version' | localize }} {{ versionText }}
+    </span>
 </footer>

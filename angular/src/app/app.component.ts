@@ -24,9 +24,11 @@ export class AppComponent extends AppComponentBase implements OnInit {
     }
 
     ngOnInit(): void {
-        this.renderer.addClass(document.body, 'sidebar-mini');
-
         SignalRAspNetCoreHelper.initSignalR();
+
+        // SidebarComponent maps: false → showSidebar, true → hideSidebar
+        const isDesktop = window.innerWidth >= 992;
+        this._layoutStore.setSidebarExpanded(!isDesktop);
 
         abp.event.on('abp.notifications.received', (userNotification) => {
             abp.notifications.showUiNotifyForUserNotification(userNotification);
