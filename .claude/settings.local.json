@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem *)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Select-Object -First 30)",
+      "Bash(Format-Table FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Muhammadkaleem\\\\Music\\\\Personal project\\\\Nexora\\\\aspnet-core\\\\src\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { $_.FullName })"
     ]
   }
 }

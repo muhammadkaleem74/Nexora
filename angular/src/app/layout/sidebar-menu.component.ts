@@ -47,6 +47,14 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             new MenuItem(this.l('Roles'), '/app/roles', 'fas fa-theater-masks', 'Pages.Roles'),
             new MenuItem(this.l('Tenants'), '/app/tenants', 'fas fa-building', 'Pages.Tenants'),
             new MenuItem(this.l('Users'), '/app/users', 'fas fa-users', 'Pages.Users'),
+            new MenuItem('Admissions', '', 'fas fa-graduation-cap', '', [
+                new MenuItem('Applications', '/app/admissions/applications', 'fas fa-file-alt'),
+                new MenuItem('Students', '/app/admissions/students', 'fas fa-user-graduate'),
+                new MenuItem('Academic Years', '/app/admissions/academic-years', 'fas fa-calendar-alt'),
+                new MenuItem('Campuses', '/app/admissions/campuses', 'fas fa-school'),
+                new MenuItem('Grade Levels', '/app/admissions/grade-levels', 'fas fa-layer-group'),
+                new MenuItem('Sections', '/app/admissions/sections', 'fas fa-chalkboard'),
+            ]),
             new MenuItem(this.l('MultiLevelMenu'), '', 'fas fa-circle', '', [
                 new MenuItem('ASP.NET Boilerplate', '', 'fas fa-dot-circle', '', [
                     new MenuItem('Home', 'https://aspnetboilerplate.com?ref=abptmpl', 'far fa-circle'),

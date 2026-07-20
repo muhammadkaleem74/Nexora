@@ -1,0 +1,38 @@
+<form #statusForm="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header title="Change Application Status" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+
+        <div class="form-group required">
+            <label class="col-form-label">New Status</label>
+            <select class="form-control" name="newStatus" [(ngModel)]="model.newStatus" required>
+                @for (opt of statusOptions; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">Review Notes</label>
+            <textarea class="form-control" name="notes" [(ngModel)]="model.notes"
+                rows="3" maxlength="1000"
+                placeholder="Optional internal notes…"></textarea>
+        </div>
+
+        @if (isRejection) {
+            <div class="form-group required">
+                <label class="col-form-label">Rejection Reason</label>
+                <textarea class="form-control" name="rejectionReason" [(ngModel)]="model.rejectionReason"
+                    rows="3" maxlength="500" required
+                    placeholder="Provide a reason for rejection…"></textarea>
+            </div>
+        }
+
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!statusForm.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>

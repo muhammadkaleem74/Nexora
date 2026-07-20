@@ -1,0 +1,78 @@
+<form #convertForm="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header title="Enroll Applicant as Student" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Registration Number</label>
+                <input type="text" class="form-control" name="registrationNumber"
+                    [(ngModel)]="model.registrationNumber" required maxlength="30"
+                    placeholder="e.g. STU-2025-00001" />
+            </div>
+            <div class="form-group required">
+                <label class="col-form-label">GR Number</label>
+                <input type="text" class="form-control" name="grNumber"
+                    [(ngModel)]="model.grNumber" required maxlength="30" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Academic Year</label>
+                <select class="form-control" name="academicYearId" [(ngModel)]="model.academicYearId" required>
+                    <option [value]="0" disabled>Select year…</option>
+                    @for (y of academicYears; track y.id) {
+                        <option [value]="y.id">{{ y.name }}</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group required">
+                <label class="col-form-label">Enrollment Date</label>
+                <input type="date" class="form-control" name="enrollmentDate"
+                    [(ngModel)]="model.enrollmentDate" required />
+            </div>
+        </div>
+
+        <div class="form-group required">
+            <label class="col-form-label">Campus</label>
+            <select class="form-control" name="campusId" [(ngModel)]="model.campusId" required
+                (ngModelChange)="onCampusChange()">
+                <option [value]="0" disabled>Select campus…</option>
+                @for (c of campuses; track c.id) {
+                    <option [value]="c.id">{{ c.name }}</option>
+                }
+            </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Grade Level</label>
+                <select class="form-control" name="currentGradeLevelId"
+                    [(ngModel)]="model.currentGradeLevelId" required
+                    (ngModelChange)="onGradeLevelChange()">
+                    <option [value]="0" disabled>{{ model.campusId ? 'Select grade…' : 'Choose campus first' }}</option>
+                    @for (g of gradeLevels; track g.id) {
+                        <option [value]="g.id">{{ g.name }}</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="col-form-label">Section <span style="color:var(--nx-text-muted); font-weight:400;">(optional)</span></label>
+                <select class="form-control" name="currentSectionId" [(ngModel)]="model.currentSectionId">
+                    <option [value]="undefined">— None —</option>
+                    @for (s of sections; track s.id) {
+                        <option [value]="s.id">{{ s.name }}</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!convertForm.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>

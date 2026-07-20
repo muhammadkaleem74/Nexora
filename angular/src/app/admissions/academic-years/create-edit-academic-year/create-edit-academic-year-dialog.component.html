@@ -1,0 +1,36 @@
+<form #form="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header [title]="isEdit ? 'Edit Academic Year' : 'Add Academic Year'" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+
+        <div class="form-group required">
+            <label class="col-form-label">Name</label>
+            <input type="text" class="form-control" name="name" [(ngModel)]="model.name" required maxlength="50" placeholder="e.g. 2025–2026" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Start Date</label>
+                <input type="date" class="form-control" name="startDate" [(ngModel)]="model.startDate" required />
+            </div>
+            <div class="form-group required">
+                <label class="col-form-label">End Date</label>
+                <input type="date" class="form-control" name="endDate" [(ngModel)]="model.endDate" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isActive" name="isActive" [(ngModel)]="model.isActive" />
+                <label class="form-check-label" for="isActive">Active</label>
+            </div>
+        </div>
+
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!form.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>

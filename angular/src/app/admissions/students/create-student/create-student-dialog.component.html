@@ -1,0 +1,122 @@
+<form #studentForm="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header title="Add Student" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Registration Number</label>
+                <input type="text" class="form-control" name="registrationNumber"
+                    [(ngModel)]="model.registrationNumber" required maxlength="30" placeholder="e.g. STU-2025-00001" />
+            </div>
+            <div class="form-group required">
+                <label class="col-form-label">GR Number</label>
+                <input type="text" class="form-control" name="grNumber"
+                    [(ngModel)]="model.grNumber" required maxlength="30" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">First Name</label>
+                <input type="text" class="form-control" name="firstName"
+                    [(ngModel)]="model.firstName" required maxlength="100" />
+            </div>
+            <div class="form-group required">
+                <label class="col-form-label">Last Name</label>
+                <input type="text" class="form-control" name="lastName"
+                    [(ngModel)]="model.lastName" required maxlength="100" />
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Date of Birth</label>
+                <input type="date" class="form-control" name="dateOfBirth" [(ngModel)]="model.dateOfBirth" required />
+            </div>
+            <div class="form-group required">
+                <label class="col-form-label">Gender</label>
+                <select class="form-control" name="gender" [(ngModel)]="model.gender" required>
+                    <option [value]="1">Male</option>
+                    <option [value]="2">Female</option>
+                    <option [value]="3">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+            <div class="form-group">
+                <label class="col-form-label">Blood Group</label>
+                <select class="form-control" name="bloodGroup" [(ngModel)]="model.bloodGroup">
+                    <option value="">—</option>
+                    @for (bg of ['A+','A-','B+','B-','AB+','AB-','O+','O-']; track bg) {
+                        <option [value]="bg">{{ bg }}</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="col-form-label">Nationality</label>
+                <input type="text" class="form-control" name="nationality" [(ngModel)]="model.nationality" maxlength="100" />
+            </div>
+            <div class="form-group">
+                <label class="col-form-label">Religion</label>
+                <input type="text" class="form-control" name="religion" [(ngModel)]="model.religion" maxlength="50" />
+            </div>
+        </div>
+
+        <hr style="border-color:var(--nx-border); margin:16px 0;" />
+
+        <div class="form-group required">
+            <label class="col-form-label">Campus</label>
+            <select class="form-control" name="campusId" [(ngModel)]="model.campusId" required (ngModelChange)="onCampusChange()">
+                <option [value]="0" disabled>Select campus…</option>
+                @for (c of campuses; track c.id) {
+                    <option [value]="c.id">{{ c.name }}</option>
+                }
+            </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Grade Level</label>
+                <select class="form-control" name="currentGradeLevelId" [(ngModel)]="model.currentGradeLevelId"
+                    required (ngModelChange)="onGradeLevelChange()">
+                    <option [value]="0" disabled>{{ model.campusId ? 'Select grade…' : 'Choose campus first' }}</option>
+                    @for (g of gradeLevels; track g.id) {
+                        <option [value]="g.id">{{ g.name }}</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="col-form-label">Section <span style="color:var(--nx-text-muted); font-weight:400;">(optional)</span></label>
+                <select class="form-control" name="currentSectionId" [(ngModel)]="model.currentSectionId">
+                    <option [value]="undefined">— None —</option>
+                    @for (s of sections; track s.id) {
+                        <option [value]="s.id">{{ s.name }}</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group required">
+                <label class="col-form-label">Enrollment Date</label>
+                <input type="date" class="form-control" name="enrollmentDate" [(ngModel)]="model.enrollmentDate" required />
+            </div>
+            <div class="form-group required">
+                <label class="col-form-label">Status</label>
+                <select class="form-control" name="status" [(ngModel)]="model.status" required>
+                    <option [value]="1">Active</option>
+                    <option [value]="2">Inactive</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!studentForm.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>

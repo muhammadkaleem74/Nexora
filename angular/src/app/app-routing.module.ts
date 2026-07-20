@@ -43,6 +43,38 @@ import { AppComponent } from './app.component';
                         loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
                         canActivate: [AppRouteGuard],
                     },
+                    {
+                        path: 'admissions/applications',
+                        loadChildren: () => import('./admissions/applications/applications.module').then((m) => m.ApplicationsModule),
+                        data: { permission: 'Pages.Admissions.Applications' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'admissions/students',
+                        loadChildren: () => import('./admissions/students/students.module').then((m) => m.StudentsModule),
+                        data: { permission: 'Pages.Admissions.Students' },
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'admissions/academic-years',
+                        loadChildren: () => import('./admissions/academic-years/academic-years.module').then((m) => m.AcademicYearsModule),
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'admissions/campuses',
+                        loadChildren: () => import('./admissions/campuses/campuses.module').then((m) => m.CampusesModule),
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'admissions/grade-levels',
+                        loadChildren: () => import('./admissions/grade-levels/grade-levels.module').then((m) => m.GradeLevelsModule),
+                        canActivate: [AppRouteGuard],
+                    },
+                    {
+                        path: 'admissions/sections',
+                        loadChildren: () => import('./admissions/sections/sections.module').then((m) => m.SectionsModule),
+                        canActivate: [AppRouteGuard],
+                    },
                 ],
             },
         ]),

@@ -1,0 +1,46 @@
+<form #form="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header [title]="isEdit ? 'Edit Campus' : 'Add Campus'" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+
+        <div class="form-group required">
+            <label class="col-form-label">Name</label>
+            <input type="text" class="form-control" name="name" [(ngModel)]="model.name" required maxlength="150" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group">
+                <label class="col-form-label">City</label>
+                <input type="text" class="form-control" name="city" [(ngModel)]="model.city" maxlength="100" />
+            </div>
+            <div class="form-group">
+                <label class="col-form-label">Country</label>
+                <input type="text" class="form-control" name="country" [(ngModel)]="model.country" maxlength="100" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">Address</label>
+            <input type="text" class="form-control" name="address" [(ngModel)]="model.address" maxlength="300" />
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">Contact Number</label>
+            <input type="text" class="form-control" name="contactNumber" [(ngModel)]="model.contactNumber" maxlength="30" />
+        </div>
+
+        <div class="form-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isActive" name="isActive" [(ngModel)]="model.isActive" />
+                <label class="form-check-label" for="isActive">Active</label>
+            </div>
+        </div>
+
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!form.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>

@@ -3,6 +3,14 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AbpHttpInterceptor } from 'abp-ng2-module';
 
 import * as ApiServiceProxies from './service-proxies';
+import {
+    AdmissionApplicationServiceProxy,
+    StudentServiceProxy,
+    AcademicYearServiceProxy,
+    CampusServiceProxy,
+    GradeLevelServiceProxy,
+    SectionServiceProxy,
+} from './admissions-proxies';
 
 @NgModule({
     providers: [
@@ -13,6 +21,12 @@ import * as ApiServiceProxies from './service-proxies';
         ApiServiceProxies.TokenAuthServiceProxy,
         ApiServiceProxies.AccountServiceProxy,
         ApiServiceProxies.ConfigurationServiceProxy,
+        AdmissionApplicationServiceProxy,
+        StudentServiceProxy,
+        AcademicYearServiceProxy,
+        CampusServiceProxy,
+        GradeLevelServiceProxy,
+        SectionServiceProxy,
         { provide: HTTP_INTERCEPTORS, useClass: AbpHttpInterceptor, multi: true },
     ],
 })
