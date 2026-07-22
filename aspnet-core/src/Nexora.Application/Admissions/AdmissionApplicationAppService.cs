@@ -208,6 +208,11 @@ public class AdmissionApplicationAppService
         var application = await Repository.GetAsync(applicationId);
         var guardian = await _guardianManager.FindOrCreateAsync(input);
 
+        if (input.IsPrimaryContact)
+            await _guardianManager.ClearPrimaryContactsAsync(
+                _applicationGuardianRepository,
+                ag => ag.ApplicationId == applicationId);
+
         var link = new ApplicationGuardian
         {
             ApplicationId = application.Id,

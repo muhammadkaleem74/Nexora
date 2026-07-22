@@ -103,6 +103,11 @@ public class StudentAppService
         var student = await Repository.GetAsync(studentId);
         var guardian = await _guardianManager.FindOrCreateAsync(input);
 
+        if (input.IsPrimaryContact)
+            await _guardianManager.ClearPrimaryContactsAsync(
+                _studentGuardianRepository,
+                sg => sg.StudentId == studentId);
+
         var link = new StudentGuardian
         {
             StudentId = student.Id,

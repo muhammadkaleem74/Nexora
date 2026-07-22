@@ -4,7 +4,7 @@ using Abp.MultiTenancy;
 
 namespace Nexora.Domain.Admissions;
 
-public class StudentGuardian : FullAuditedEntity<long>, IMustHaveTenant
+public class StudentGuardian : FullAuditedEntity<long>, IMustHaveTenant, IHasPrimaryContact
 {
     public int TenantId { get; set; }
 

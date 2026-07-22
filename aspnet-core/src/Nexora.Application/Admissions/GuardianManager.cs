@@ -1,5 +1,9 @@
+using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Abp.Dependency;
+using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -50,5 +54,20 @@ public class GuardianManager : ITransientDependency
 
         await _guardianRepository.InsertAndGetIdAsync(guardian);
         return guardian;
+    }
+
+    /// <summary>
+    /// Clears IsPrimaryContact on all existing link rows matching <paramref name="parentFilter"/>
+    /// so that at most one guardian per application/student can be primary.
+    /// Call this before inserting the new link when IsPrimaryContact is true.
+    /// </summary>
+    public async Task ClearPrimaryContactsAsync<TLink>(
+        IRepository<TLink, long> repo,
+        Expression<Func<TLink, bool>> parentFilter)
+        where TLink : class, IHasPrimaryContact, IEntity<long>
+    {
+        var existing = await repo.GetAll().Where(parentFilter).ToListAsync();
+        foreach (var link in existing)
+            link.IsPrimaryContact = false;
     }
 }
