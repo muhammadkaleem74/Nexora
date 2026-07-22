@@ -1,0 +1,46 @@
+<form #form="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header [title]="'Record Result — ' + assessmentTypeLabel" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label">Score</label>
+                    <input type="number" class="form-control" name="score"
+                        [(ngModel)]="model.score" min="0" step="0.5" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label">Max Score</label>
+                    <input type="number" class="form-control" name="maxScore"
+                        [(ngModel)]="model.maxScore" min="0" step="0.5" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group required">
+            <label class="col-form-label">Result</label>
+            <select class="form-control" name="result" [(ngModel)]="model.result" required>
+                @for (r of resultOptions; track r.value) {
+                    <option [value]="r.value">{{ r.label }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">Remarks</label>
+            <textarea class="form-control" name="remarks"
+                [(ngModel)]="model.remarks" rows="3" maxlength="1000"
+                placeholder="Optional notes about performance…"></textarea>
+        </div>
+
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!form.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>

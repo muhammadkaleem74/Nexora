@@ -1,0 +1,43 @@
+<form #form="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header title="Add Document" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+
+        <div class="form-group required">
+            <label class="col-form-label">Document Type</label>
+            <select class="form-control" name="documentType" [(ngModel)]="model.documentType" required>
+                @for (dt of documentTypes; track dt.value) {
+                    <option [value]="dt.value">{{ dt.label }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group required">
+            <label class="col-form-label">File Name</label>
+            <input type="text" class="form-control" name="fileName"
+                [(ngModel)]="model.fileName" required maxlength="255"
+                placeholder="e.g. birth-certificate.pdf" />
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">File URL</label>
+            <input type="url" class="form-control" name="fileUrl"
+                [(ngModel)]="model.fileUrl" maxlength="500"
+                placeholder="https://storage.example.com/..." />
+            <small class="form-text text-muted">Paste the link after uploading to storage.</small>
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">File Size (KB)</label>
+            <input type="number" class="form-control" name="fileSizeKb"
+                [(ngModel)]="model.fileSizeKb" min="0" />
+        </div>
+
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!form.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>

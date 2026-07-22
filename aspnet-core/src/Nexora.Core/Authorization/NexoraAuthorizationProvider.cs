@@ -20,11 +20,17 @@ public class NexoraAuthorizationProvider : AuthorizationProvider
         applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_Edit, L("EditAdmissionApplication"));
         applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_Delete, L("DeleteAdmissionApplication"));
         applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ChangeStatus, L("ChangeApplicationStatus"));
+        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ManageGuardians, L("ManageApplicationGuardians"));
+        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ManageDocuments, L("ManageApplicationDocuments"));
+        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_VerifyDocument, L("VerifyApplicationDocument"));
+        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ManageAssessments, L("ManageApplicationAssessments"));
+        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_RecordAssessment, L("RecordAssessmentResult"));
 
         var students = admissions.CreateChildPermission(PermissionNames.Pages_Admissions_Students, L("Students"));
         students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_Create, L("CreateStudent"));
         students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_Edit, L("EditStudent"));
         students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_Delete, L("DeleteStudent"));
+        students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_ManageGuardians, L("ManageStudentGuardians"));
     }
 
     private static ILocalizableString L(string name)

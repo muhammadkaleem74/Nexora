@@ -1,0 +1,1166 @@
+diff --git a/angular/src/app/admissions/applications/applications-routing.module.ts b/angular/src/app/admissions/applications/applications-routing.module.ts
+index abc65a8..4f90ee0 100644
+--- a/angular/src/app/admissions/applications/applications-routing.module.ts
++++ b/angular/src/app/admissions/applications/applications-routing.module.ts
+@@ -1,9 +1,11 @@
+ import { NgModule } from '@angular/core';
+ import { RouterModule, Routes } from '@angular/router';
+ import { ApplicationsComponent } from './applications.component';
++import { ApplicationDetailComponent } from './application-detail/application-detail.component';
+ 
+ const routes: Routes = [
+     { path: '', component: ApplicationsComponent, pathMatch: 'full' },
++    { path: ':id', component: ApplicationDetailComponent },
+ ];
+ 
+ @NgModule({
+diff --git a/angular/src/app/admissions/applications/applications.component.html b/angular/src/app/admissions/applications/applications.component.html
+index 11b3173..ccec4cc 100644
+--- a/angular/src/app/admissions/applications/applications.component.html
++++ b/angular/src/app/admissions/applications/applications.component.html
+@@ -105,12 +105,13 @@
+                 <ng-template pTemplate="body" let-record="$implicit">
+                     <tr>
+                         <td>
+-                            <span style="font-weight:600; font-family:monospace; font-size:13px;">
++                            <a (click)="openDetail(record)" href="javascript:;"
++                                style="font-weight:600; font-family:monospace; font-size:13px; color:var(--nx-accent); text-decoration:none;">
+                                 {{ record.applicationNumber }}
+-                            </span>
++                            </a>
+                         </td>
+                         <td>
+-                            <div style="font-weight:500;">{{ record.firstName }} {{ record.lastName }}</div>
++                            <div style="font-weight:500; cursor:pointer;" (click)="openDetail(record)">{{ record.firstName }} {{ record.lastName }}</div>
+                             <div style="font-size:12px; color:var(--nx-text-muted);">
+                                 {{ record.gender === 1 ? 'Male' : record.gender === 2 ? 'Female' : 'Other' }}
+                             </div>
+diff --git a/angular/src/app/admissions/applications/applications.component.ts b/angular/src/app/admissions/applications/applications.component.ts
+index dcaf65d..6030851 100644
+--- a/angular/src/app/admissions/applications/applications.component.ts
++++ b/angular/src/app/admissions/applications/applications.component.ts
+@@ -7,6 +7,7 @@ import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
+ import { Table, TableModule } from 'primeng/table';
+ import { Paginator, PaginatorModule } from 'primeng/paginator';
+ import { FormsModule } from '@angular/forms';
++import { Router } from '@angular/router';
+ import { DatePipe, NgClass, NgIf } from '@angular/common';
+ import { LocalizePipe } from '@shared/pipes/localize.pipe';
+ import {
+@@ -61,11 +62,16 @@ export class ApplicationsComponent extends PagedListingComponentBase<AdmissionAp
+         private _applicationService: AdmissionApplicationServiceProxy,
+         private _campusService: CampusServiceProxy,
+         private _academicYearService: AcademicYearServiceProxy,
+-        private _modalService: BsModalService
++        private _modalService: BsModalService,
++        private _router: Router
+     ) {
+         super(injector, cd);
+     }
+ 
++    openDetail(record: AdmissionApplicationListDto): void {
++        this._router.navigate(['/app/admissions/applications', record.id]);
++    }
++
+     ngOnInit(): void {
+         this._campusService.getAll().subscribe(r => { this.campuses = r.items; this.cd.detectChanges(); });
+         this._academicYearService.getAll().subscribe(r => { this.academicYears = r.items; this.cd.detectChanges(); });
+diff --git a/angular/src/app/admissions/applications/applications.module.ts b/angular/src/app/admissions/applications/applications.module.ts
+index f804856..559ff8e 100644
+--- a/angular/src/app/admissions/applications/applications.module.ts
++++ b/angular/src/app/admissions/applications/applications.module.ts
+@@ -5,6 +5,12 @@ import { ApplicationsComponent } from './applications.component';
+ import { CreateApplicationDialogComponent } from './create-application/create-application-dialog.component';
+ import { ChangeStatusDialogComponent } from './change-status/change-status-dialog.component';
+ import { ConvertToStudentDialogComponent } from './convert-to-student/convert-to-student-dialog.component';
++import { ApplicationDetailComponent } from './application-detail/application-detail.component';
++import { CreateGuardianDialogComponent } from './application-detail/create-guardian-dialog.component';
++import { CreateDocumentDialogComponent } from './application-detail/create-document-dialog.component';
++import { VerifyDocumentDialogComponent } from './application-detail/verify-document-dialog.component';
++import { CreateAssessmentDialogComponent } from './application-detail/create-assessment-dialog.component';
++import { RecordResultDialogComponent } from './application-detail/record-result-dialog.component';
+ 
+ @NgModule({
+     imports: [
+@@ -14,6 +20,12 @@ import { ConvertToStudentDialogComponent } from './convert-to-student/convert-to
+         CreateApplicationDialogComponent,
+         ChangeStatusDialogComponent,
+         ConvertToStudentDialogComponent,
++        ApplicationDetailComponent,
++        CreateGuardianDialogComponent,
++        CreateDocumentDialogComponent,
++        VerifyDocumentDialogComponent,
++        CreateAssessmentDialogComponent,
++        RecordResultDialogComponent,
+     ],
+ })
+ export class ApplicationsModule {}
+diff --git a/angular/src/app/admissions/students/student-detail/student-detail.component.html b/angular/src/app/admissions/students/student-detail/student-detail.component.html
+index 9d0bd8a..c8e742f 100644
+--- a/angular/src/app/admissions/students/student-detail/student-detail.component.html
++++ b/angular/src/app/admissions/students/student-detail/student-detail.component.html
+@@ -6,6 +6,16 @@
+         </div>
+     }
+ 
++    @if (!loading && !student) {
++        <div class="nx-card" style="padding:48px; text-align:center; color:var(--nx-text-muted);">
++            <i class="fas fa-exclamation-triangle" style="font-size:32px; margin-bottom:12px; display:block; opacity:.4;"></i>
++            Student not found.
++            <div style="margin-top:16px;">
++                <a routerLink="/app/admissions/students" class="nx-btn nx-btn--secondary nx-btn--sm">Back to list</a>
++            </div>
++        </div>
++    }
++
+     @if (!loading && student) {
+ 
+         <!-- Page Header -->
+@@ -13,8 +23,9 @@
+             <div>
+                 <h1 class="nx-page-title">{{ student.firstName }} {{ student.lastName }}</h1>
+                 <p class="nx-page-subtitle">
+-                    Reg: <strong>{{ student.registrationNumber }}</strong>
+-                    &nbsp;·&nbsp; GR: <strong>{{ student.grNumber }}</strong>
++                    <span style="font-family:monospace; font-weight:600; color:var(--nx-accent);">{{ student.registrationNumber }}</span>
++                    &nbsp;·&nbsp; GR: <span style="font-family:monospace;">{{ student.grNumber }}</span>
++                    &nbsp;·&nbsp; {{ student.campusName }}
+                 </p>
+             </div>
+             <div style="display:flex; gap:8px; align-items:center;">
+@@ -25,131 +36,172 @@
+             </div>
+         </div>
+ 
+-        <!-- Personal Info -->
+-        <div class="nx-card" style="margin-bottom:16px;">
+-            <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
+-                <h3 style="font-size:14px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.05em; margin:0;">
+-                    Personal Information
+-                </h3>
+-            </div>
+-            <div style="padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:20px;">
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Date of Birth</div>
+-                    <div style="font-weight:500;">{{ student.dateOfBirth | date:'dd MMM yyyy' }}</div>
+-                </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Gender</div>
+-                    <div style="font-weight:500;">{{ getGenderLabel(student.gender) }}</div>
+-                </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Blood Group</div>
+-                    <div style="font-weight:500;">{{ student.bloodGroup || '—' }}</div>
+-                </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Nationality</div>
+-                    <div style="font-weight:500;">{{ student.nationality || '—' }}</div>
+-                </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Religion</div>
+-                    <div style="font-weight:500;">{{ student.religion || '—' }}</div>
+-                </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Campus</div>
+-                    <div style="font-weight:500;">{{ student.campusName }}</div>
+-                </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Current Grade</div>
+-                    <div style="font-weight:500;">{{ student.currentGradeLevelName }}</div>
+-                </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Section</div>
+-                    <div style="font-weight:500;">{{ student.currentSectionName || '—' }}</div>
++        <!-- Tab Nav -->
++        <div style="display:flex; border-bottom:2px solid var(--nx-border); margin-bottom:20px; overflow-x:auto;">
++            @for (tab of tabs; track tab.id) {
++                <button
++                    (click)="activeTab = tab.id"
++                    style="padding:12px 20px; background:none; border:none; cursor:pointer; font-size:13.5px; font-weight:500; white-space:nowrap; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .15s, border-color .15s;"
++                    [style.color]="activeTab === tab.id ? 'var(--nx-accent)' : 'var(--nx-text-muted)'"
++                    [style.borderBottomColor]="activeTab === tab.id ? 'var(--nx-accent)' : 'transparent'">
++                    <i class="fas" [ngClass]="tab.icon" style="margin-right:6px;"></i>{{ tab.label }}
++                    @if (tabCount(tab.id) >= 0) {
++                        <span style="margin-left:5px; font-size:11px; background:var(--nx-surface-hover); border-radius:10px; padding:1px 6px;">{{ tabCount(tab.id) }}</span>
++                    }
++                </button>
++            }
++        </div>
++
++        <!-- ── Overview ────────────────────────────────────────────────────── -->
++        @if (activeTab === 'overview') {
++            <div class="nx-card">
++                <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
++                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Personal Information</h3>
+                 </div>
+-                <div>
+-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Enrolled On</div>
+-                    <div style="font-weight:500;">{{ student.enrollmentDate | date:'dd MMM yyyy' }}</div>
++                <div style="padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:20px;">
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Date of Birth</div>
++                        <div style="font-weight:500;">{{ student.dateOfBirth | date:'dd MMM yyyy' }}</div>
++                    </div>
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Gender</div>
++                        <div style="font-weight:500;">{{ getGenderLabel(student.gender) }}</div>
++                    </div>
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Blood Group</div>
++                        <div style="font-weight:500;">{{ student.bloodGroup || '—' }}</div>
++                    </div>
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Nationality</div>
++                        <div style="font-weight:500;">{{ student.nationality || '—' }}</div>
++                    </div>
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Religion</div>
++                        <div style="font-weight:500;">{{ student.religion || '—' }}</div>
++                    </div>
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Grade Level</div>
++                        <div style="font-weight:500;">{{ student.currentGradeLevelName }}</div>
++                    </div>
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Section</div>
++                        <div style="font-weight:500;">{{ student.currentSectionName || '—' }}</div>
++                    </div>
++                    <div>
++                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Enrollment Date</div>
++                        <div style="font-weight:500;">{{ student.enrollmentDate | date:'dd MMM yyyy' }}</div>
++                    </div>
+                 </div>
+             </div>
+-        </div>
++        }
+ 
+-        <!-- Guardians -->
+-        <div class="nx-card" style="margin-bottom:16px;">
+-            <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
+-                <h3 style="font-size:14px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.05em; margin:0;">
+-                    Guardians / Parents
+-                </h3>
+-            </div>
+-            @if (!student.guardians?.length) {
+-                <div style="padding:32px; text-align:center; color:var(--nx-text-muted);">No guardians on record.</div>
+-            }
+-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:0;">
+-                @for (g of student.guardians; track g.id) {
+-                    <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
+-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+-                            <span style="font-weight:600;">{{ g.fullName }}</span>
+-                            @if (g.isPrimaryContact) {
+-                                <span class="nx-status nx-status--active" style="font-size:11px;">Primary</span>
+-                            }
+-                        </div>
+-                        <div style="font-size:13px; color:var(--nx-text-muted); margin-bottom:4px;">
+-                            {{ getRelationshipLabel(g.relationship) }}
+-                        </div>
+-                        @if (g.phone) { <div style="font-size:13px;"><i class="fas fa-phone" style="width:14px;"></i> {{ g.phone }}</div> }
+-                        @if (g.email) { <div style="font-size:13px;"><i class="fas fa-envelope" style="width:14px;"></i> {{ g.email }}</div> }
+-                        @if (g.canPickupStudent) {
+-                            <div style="font-size:12px; margin-top:8px; color:var(--nx-accent);">
+-                                <i class="fas fa-check-circle"></i> Authorised for pickup
+-                            </div>
+-                        }
++        <!-- ── Guardians ───────────────────────────────────────────────────── -->
++        @if (activeTab === 'guardians') {
++            <div class="nx-card">
++                <div style="padding:16px 24px; border-bottom:1px solid var(--nx-border); display:flex; justify-content:space-between; align-items:center;">
++                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Guardians / Parents</h3>
++                    <button class="nx-btn nx-btn--primary nx-btn--sm" (click)="addGuardian()">
++                        <i class="fas fa-plus"></i> Add Guardian
++                    </button>
++                </div>
++                @if (!guardians.length) {
++                    <div style="padding:48px; text-align:center; color:var(--nx-text-muted);">
++                        <i class="fas fa-users" style="font-size:28px; margin-bottom:12px; display:block; opacity:.3;"></i>
++                        No guardians on record. Click <strong>Add Guardian</strong> to add one.
+                     </div>
+                 }
++                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr));">
++                    @for (g of guardians; track g.id) {
++                        <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border); border-right:1px solid var(--nx-border);">
++                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
++                                <div>
++                                    <div style="font-weight:600; margin-bottom:2px;">{{ g.fullName }}</div>
++                                    <div style="font-size:12px; color:var(--nx-text-muted);">{{ getRelationshipLabel(g.relationship) }}</div>
++                                </div>
++                                <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
++                                    @if (g.isPrimaryContact) {
++                                        <span class="nx-status nx-status--active" style="font-size:11px;">Primary</span>
++                                    }
++                                    <button class="nx-btn nx-btn--danger nx-btn--sm" (click)="removeGuardian(g)" title="Remove">
++                                        <i class="fas fa-trash"></i>
++                                    </button>
++                                </div>
++                            </div>
++                            @if (g.phone) {
++                                <div style="font-size:13px; margin-bottom:4px;">
++                                    <i class="fas fa-phone" style="width:14px; color:var(--nx-text-muted);"></i> {{ g.phone }}
++                                </div>
++                            }
++                            @if (g.email) {
++                                <div style="font-size:13px; margin-bottom:4px;">
++                                    <i class="fas fa-envelope" style="width:14px; color:var(--nx-text-muted);"></i> {{ g.email }}
++                                </div>
++                            }
++                            @if (g.occupation) {
++                                <div style="font-size:13px; color:var(--nx-text-muted);">
++                                    <i class="fas fa-briefcase" style="width:14px;"></i> {{ g.occupation }}
++                                </div>
++                            }
++                            @if (g.nationalIdNumber) {
++                                <div style="font-size:11px; margin-top:8px; color:var(--nx-text-muted);">ID: {{ g.nationalIdNumber }}</div>
++                            }
++                            @if (g.canPickupStudent) {
++                                <div style="font-size:12px; margin-top:8px; color:var(--nx-accent);">
++                                    <i class="fas fa-check-circle"></i> Authorised for pickup
++                                </div>
++                            }
++                        </div>
++                    }
++                </div>
+             </div>
+-        </div>
++        }
+ 
+-        <!-- Enrollment History -->
+-        <div class="nx-card">
+-            <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
+-                <h3 style="font-size:14px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.05em; margin:0;">
+-                    Enrollment History
+-                </h3>
+-            </div>
+-            @if (!student.enrollmentHistories?.length) {
+-                <div style="padding:32px; text-align:center; color:var(--nx-text-muted);">No history available.</div>
+-            }
+-            <div style="overflow-x:auto;">
+-                <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+-                    <thead>
+-                        <tr style="background:var(--nx-surface-hover);">
+-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Academic Year</th>
+-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Grade</th>
+-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Section</th>
+-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Enrolled</th>
+-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Outcome</th>
+-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Remarks</th>
+-                        </tr>
+-                    </thead>
+-                    <tbody>
+-                        @for (h of student.enrollmentHistories; track h.id) {
+-                            <tr style="border-bottom:1px solid var(--nx-border);">
+-                                <td style="padding:10px 16px;">{{ h.academicYearName }}</td>
+-                                <td style="padding:10px 16px;">{{ h.gradeLevelName }}</td>
+-                                <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.sectionName || '—' }}</td>
+-                                <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.enrollmentDate | date:'dd MMM yyyy' }}</td>
+-                                <td style="padding:10px 16px;">
+-                                    <span class="nx-status"
+-                                        [class.nx-status--active]="h.promotionStatus === PromotionStatus.Promoted"
+-                                        [class.nx-status--inactive]="h.promotionStatus === PromotionStatus.Retained || h.promotionStatus === PromotionStatus.Withdrawn"
+-                                        [class.nx-status--pending]="h.promotionStatus === PromotionStatus.Transferred">
+-                                        {{ getPromotionLabel(h.promotionStatus) }}
+-                                    </span>
+-                                </td>
+-                                <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.remarks || '—' }}</td>
+-                            </tr>
+-                        }
+-                    </tbody>
+-                </table>
++        <!-- ── Enrollment History ──────────────────────────────────────────── -->
++        @if (activeTab === 'history') {
++            <div class="nx-card">
++                <div style="padding:16px 24px; border-bottom:1px solid var(--nx-border);">
++                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Enrollment History</h3>
++                </div>
++                @if (!history.length) {
++                    <div style="padding:48px; text-align:center; color:var(--nx-text-muted);">
++                        <i class="fas fa-history" style="font-size:28px; margin-bottom:12px; display:block; opacity:.3;"></i>
++                        No enrollment history available.
++                    </div>
++                }
++                @if (history.length) {
++                    <div style="overflow-x:auto;">
++                        <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
++                            <thead>
++                                <tr style="background:var(--nx-surface-hover);">
++                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Academic Year</th>
++                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Grade</th>
++                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Section</th>
++                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Enrolled</th>
++                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Outcome</th>
++                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Remarks</th>
++                                </tr>
++                            </thead>
++                            <tbody>
++                                @for (h of history; track h.id) {
++                                    <tr style="border-bottom:1px solid var(--nx-border);">
++                                        <td style="padding:10px 16px; font-weight:500;">{{ h.academicYearName }}</td>
++                                        <td style="padding:10px 16px;">{{ h.gradeLevelName }}</td>
++                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.sectionName || '—' }}</td>
++                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.enrollmentDate | date:'dd MMM yyyy' }}</td>
++                                        <td style="padding:10px 16px;">
++                                            <span class="nx-status" [ngClass]="getPromotionClass(h.promotionStatus)">
++                                                {{ getPromotionLabel(h.promotionStatus) }}
++                                            </span>
++                                        </td>
++                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.remarks || '—' }}</td>
++                                    </tr>
++                                }
++                            </tbody>
++                        </table>
++                    </div>
++                }
+             </div>
+-        </div>
++        }
+ 
+     }
+ 
+diff --git a/angular/src/app/admissions/students/student-detail/student-detail.component.ts b/angular/src/app/admissions/students/student-detail/student-detail.component.ts
+index e098cb1..cabdafd 100644
+--- a/angular/src/app/admissions/students/student-detail/student-detail.component.ts
++++ b/angular/src/app/admissions/students/student-detail/student-detail.component.ts
+@@ -1,9 +1,9 @@
+ import { ChangeDetectorRef, Component, Injector, OnInit } from '@angular/core';
+ import { ActivatedRoute, RouterLink } from '@angular/router';
++import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+ import { appModuleAnimation } from '@shared/animations/routerTransition';
+ import { AppComponentBase } from '@shared/app-component-base';
+-import { NgIf, NgFor, DatePipe } from '@angular/common';
+-import { LocalizePipe } from '@shared/pipes/localize.pipe';
++import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
+ import {
+     StudentServiceProxy,
+     StudentDetailDto,
+@@ -13,25 +13,35 @@ import {
+     PromotionStatus,
+     StudentStatus,
+ } from '@shared/service-proxies/admissions-proxies';
++import { StudentGuardianDialogComponent } from './student-guardian-dialog.component';
+ 
+ @Component({
+     templateUrl: './student-detail.component.html',
+     animations: [appModuleAnimation()],
+     standalone: true,
+-    imports: [NgIf, NgFor, DatePipe, RouterLink, LocalizePipe],
++    imports: [NgIf, NgFor, NgClass, DatePipe, RouterLink],
+ })
+ export class StudentDetailComponent extends AppComponentBase implements OnInit {
+     student: StudentDetailDto | undefined;
+     loading = true;
++    activeTab: 'overview' | 'guardians' | 'history' = 'overview';
++
++    guardians: StudentGuardianDto[] = [];
++    history: EnrollmentHistoryDto[] = [];
+ 
+-    GuardianRelationship = GuardianRelationship;
+     PromotionStatus = PromotionStatus;
+-    StudentStatus = StudentStatus;
++
++    tabs = [
++        { id: 'overview',  label: 'Overview',            icon: 'fa-info-circle' },
++        { id: 'guardians', label: 'Guardians',            icon: 'fa-users' },
++        { id: 'history',   label: 'Enrollment History',   icon: 'fa-history' },
++    ];
+ 
+     constructor(
+         injector: Injector,
+         private _route: ActivatedRoute,
+         private _studentService: StudentServiceProxy,
++        private _modalService: BsModalService,
+         private cd: ChangeDetectorRef
+     ) {
+         super(injector);
+@@ -42,6 +52,8 @@ export class StudentDetailComponent extends AppComponentBase implements OnInit {
+         this._studentService.getDetail(id).subscribe({
+             next: (s) => {
+                 this.student = s;
++                this.guardians = s.guardians ?? [];
++                this.history = s.enrollmentHistories ?? [];
+                 this.loading = false;
+                 this.cd.detectChanges();
+             },
+@@ -52,23 +64,56 @@ export class StudentDetailComponent extends AppComponentBase implements OnInit {
+         });
+     }
+ 
+-    getRelationshipLabel(r: GuardianRelationship): string {
+-        return GuardianRelationship[r] ?? 'Unknown';
++    tabCount(id: string): number {
++        if (id === 'guardians') return this.guardians.length;
++        if (id === 'history')   return this.history.length;
++        return -1;
+     }
+ 
+-    getPromotionLabel(p: PromotionStatus): string {
+-        return PromotionStatus[p] ?? 'Unknown';
++    // ── Guardians ─────────────────────────────────────────────────────────────
++
++    addGuardian(): void {
++        const ref: BsModalRef = this._modalService.show(StudentGuardianDialogComponent, {
++            class: 'modal-lg',
++            initialState: { studentId: this.student.id },
++        });
++        ref.content.onSave.subscribe((g: StudentGuardianDto) => {
++            this.guardians = [...this.guardians, g];
++            this.cd.detectChanges();
++        });
+     }
+ 
+-    getStatusClass(s: StudentStatus): string {
+-        return s === StudentStatus.Active ? 'nx-status--active' : 'nx-status--inactive';
++    removeGuardian(g: StudentGuardianDto): void {
++        abp.message.confirm(`Remove ${g.fullName}?`, undefined, (confirmed: boolean) => {
++            if (!confirmed) return;
++            this._studentService.removeGuardian(g.id).subscribe(() => {
++                this.guardians = this.guardians.filter(x => x.id !== g.id);
++                this.cd.detectChanges();
++            });
++        });
+     }
+ 
+-    getStatusLabel(s: StudentStatus): string {
+-        return StudentStatus[s] ?? 'Unknown';
++    // ── Label helpers ─────────────────────────────────────────────────────────
++
++    getStatusClass(s: StudentStatus): string {
++        switch (s) {
++            case StudentStatus.Active:      return 'nx-status--active';
++            case StudentStatus.Inactive:    return 'nx-status--inactive';
++            default:                        return 'nx-status--pending';
++        }
+     }
+ 
+-    getGenderLabel(g: number): string {
+-        return g === 1 ? 'Male' : g === 2 ? 'Female' : 'Other';
++    getStatusLabel(s: StudentStatus): string { return StudentStatus[s] ?? 'Unknown'; }
++
++    getRelationshipLabel(r: GuardianRelationship): string { return GuardianRelationship[r] ?? 'Other'; }
++
++    getGenderLabel(g: number): string { return g === 1 ? 'Male' : g === 2 ? 'Female' : 'Other'; }
++
++    getPromotionClass(p: PromotionStatus): string {
++        if (p === PromotionStatus.Promoted)   return 'nx-status--active';
++        if (p === PromotionStatus.Retained || p === PromotionStatus.Withdrawn) return 'nx-status--inactive';
++        return 'nx-status--pending';
+     }
++
++    getPromotionLabel(p: PromotionStatus): string { return PromotionStatus[p] ?? 'Unknown'; }
+ }
+diff --git a/angular/src/app/admissions/students/students.component.html b/angular/src/app/admissions/students/students.component.html
+index 9cb352a..db8d6c1 100644
+--- a/angular/src/app/admissions/students/students.component.html
++++ b/angular/src/app/admissions/students/students.component.html
+@@ -98,11 +98,14 @@
+                 <ng-template pTemplate="body" let-record="$implicit">
+                     <tr>
+                         <td>
+-                            <span style="font-weight:600; font-family:monospace; font-size:13px;">{{ record.registrationNumber }}</span>
++                            <a (click)="viewDetail(record)" href="javascript:;"
++                                style="font-weight:600; font-family:monospace; font-size:13px; color:var(--nx-accent); text-decoration:none;">
++                                {{ record.registrationNumber }}
++                            </a>
+                             <div style="font-size:11px; color:var(--nx-text-muted);">GR: {{ record.grNumber }}</div>
+                         </td>
+                         <td>
+-                            <div style="font-weight:500;">{{ record.firstName }} {{ record.lastName }}</div>
++                            <div style="font-weight:500; cursor:pointer;" (click)="viewDetail(record)">{{ record.firstName }} {{ record.lastName }}</div>
+                             <div style="font-size:12px; color:var(--nx-text-muted);">
+                                 {{ record.gender === 1 ? 'Male' : record.gender === 2 ? 'Female' : 'Other' }}
+                             </div>
+diff --git a/angular/src/app/admissions/students/students.module.ts b/angular/src/app/admissions/students/students.module.ts
+index 6adc0ac..f4e9013 100644
+--- a/angular/src/app/admissions/students/students.module.ts
++++ b/angular/src/app/admissions/students/students.module.ts
+@@ -4,6 +4,7 @@ import { StudentsRoutingModule } from './students-routing.module';
+ import { StudentsComponent } from './students.component';
+ import { StudentDetailComponent } from './student-detail/student-detail.component';
+ import { CreateStudentDialogComponent } from './create-student/create-student-dialog.component';
++import { StudentGuardianDialogComponent } from './student-detail/student-guardian-dialog.component';
+ 
+ @NgModule({
+     imports: [
+@@ -12,6 +13,7 @@ import { CreateStudentDialogComponent } from './create-student/create-student-di
+         StudentsComponent,
+         StudentDetailComponent,
+         CreateStudentDialogComponent,
++        StudentGuardianDialogComponent,
+     ],
+ })
+ export class StudentsModule {}
+diff --git a/angular/src/shared/service-proxies/admissions-proxies.ts b/angular/src/shared/service-proxies/admissions-proxies.ts
+index ba3ddba..305e504 100644
+--- a/angular/src/shared/service-proxies/admissions-proxies.ts
++++ b/angular/src/shared/service-proxies/admissions-proxies.ts
+@@ -44,6 +44,35 @@ export enum PromotionStatus {
+     Withdrawn = 4,
+ }
+ 
++export enum DocumentType {
++    BirthCertificate = 1,
++    PassportPhoto = 2,
++    PreviousSchoolReport = 3,
++    MedicalRecord = 4,
++    NationalId = 5,
++    Other = 99,
++}
++
++export enum VerificationStatus {
++    Pending = 0,
++    Verified = 1,
++    Rejected = 2,
++}
++
++export enum AssessmentType {
++    Written = 1,
++    Oral = 2,
++    Practical = 3,
++    Interview = 4,
++}
++
++export enum AssessmentResult {
++    Pending = 0,
++    Pass = 1,
++    Fail = 2,
++    Conditional = 3,
++}
++
+ // ── Shared paged result ───────────────────────────────────────────────────────
+ 
+ export interface PagedResult<T> {
+@@ -149,22 +178,63 @@ export interface AdmissionApplicationDetailDto extends AdmissionApplicationListD
+ 
+ export interface ApplicationDocumentDto {
+     id: number;
+-    documentType: number;
++    applicationId: number;
++    documentType: DocumentType;
+     fileName: string;
+     fileUrl: string;
+     fileSizeKb: number | undefined;
+     uploadedDate: string;
+-    verificationStatus: number;
++    verificationStatus: VerificationStatus;
++    verifiedByUserId: number | undefined;
++    verifiedDate: string | undefined;
++    rejectionNote: string;
+ }
+ 
+ export interface AdmissionAssessmentDto {
+     id: number;
+-    assessmentType: number;
++    applicationId: number;
++    assessmentType: AssessmentType;
++    scheduledDate: string | undefined;
++    conductedByUserId: number | undefined;
++    score: number | undefined;
++    maxScore: number | undefined;
++    remarks: string;
++    result: AssessmentResult;
++}
++
++export interface CreateGuardianDto {
++    fullName: string;
++    relationship: GuardianRelationship;
++    nationalIdNumber: string;
++    email: string;
++    phone: string;
++    occupation: string;
++    address: string;
++    isPrimaryContact: boolean;
++}
++
++export interface CreateApplicationDocumentDto {
++    documentType: DocumentType;
++    fileName: string;
++    fileUrl: string;
++    fileSizeKb: number | undefined;
++}
++
++export interface VerifyDocumentDto {
++    verificationStatus: VerificationStatus;
++    rejectionNote: string;
++}
++
++export interface CreateAssessmentDto {
++    assessmentType: AssessmentType;
+     scheduledDate: string | undefined;
++}
++
++export interface RecordAssessmentResultDto {
+     score: number | undefined;
+     maxScore: number | undefined;
+     remarks: string;
+-    result: number;
++    result: AssessmentResult;
+ }
+ 
+ export interface CreateAdmissionApplicationDto {
+@@ -326,6 +396,52 @@ export class AdmissionApplicationServiceProxy {
+     convertToStudent(body: ConvertToStudentDto): Observable<StudentListDto> {
+         return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/ConvertToStudent`, body).pipe(map(unwrap));
+     }
++
++    // ── Guardians ─────────────────────────────────────────────────────────────
++
++    addGuardian(applicationId: number, body: CreateGuardianDto): Observable<ApplicationGuardianDto> {
++        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/AddGuardian?applicationId=${applicationId}`, body).pipe(map(unwrap));
++    }
++
++    removeGuardian(applicationGuardianId: number): Observable<void> {
++        return this.http.post<void>(`${this.baseUrl}/api/services/app/AdmissionApplication/RemoveGuardian?applicationGuardianId=${applicationGuardianId}`, null);
++    }
++
++    getGuardians(applicationId: number): Observable<ApplicationGuardianDto[]> {
++        return this.http.get<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/GetGuardians?applicationId=${applicationId}`).pipe(map(unwrap));
++    }
++
++    // ── Documents ─────────────────────────────────────────────────────────────
++
++    addDocument(applicationId: number, body: CreateApplicationDocumentDto): Observable<ApplicationDocumentDto> {
++        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/AddDocument?applicationId=${applicationId}`, body).pipe(map(unwrap));
++    }
++
++    removeDocument(documentId: number): Observable<void> {
++        return this.http.post<void>(`${this.baseUrl}/api/services/app/AdmissionApplication/RemoveDocument?documentId=${documentId}`, null);
++    }
++
++    verifyDocument(documentId: number, body: VerifyDocumentDto): Observable<ApplicationDocumentDto> {
++        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/VerifyDocument?documentId=${documentId}`, body).pipe(map(unwrap));
++    }
++
++    getDocuments(applicationId: number): Observable<ApplicationDocumentDto[]> {
++        return this.http.get<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/GetDocuments?applicationId=${applicationId}`).pipe(map(unwrap));
++    }
++
++    // ── Assessments ───────────────────────────────────────────────────────────
++
++    scheduleAssessment(applicationId: number, body: CreateAssessmentDto): Observable<AdmissionAssessmentDto> {
++        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/ScheduleAssessment?applicationId=${applicationId}`, body).pipe(map(unwrap));
++    }
++
++    recordAssessmentResult(assessmentId: number, body: RecordAssessmentResultDto): Observable<AdmissionAssessmentDto> {
++        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/RecordAssessmentResult?assessmentId=${assessmentId}`, body).pipe(map(unwrap));
++    }
++
++    getAssessments(applicationId: number): Observable<AdmissionAssessmentDto[]> {
++        return this.http.get<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/GetAssessments?applicationId=${applicationId}`).pipe(map(unwrap));
++    }
+ }
+ 
+ @Injectable()
+@@ -370,6 +486,18 @@ export class StudentServiceProxy {
+     getEnrollmentHistory(studentId: number): Observable<EnrollmentHistoryDto[]> {
+         return this.http.get<any>(`${this.baseUrl}/api/services/app/Student/GetEnrollmentHistory?studentId=${studentId}`).pipe(map(unwrap));
+     }
++
++    addGuardian(studentId: number, body: CreateGuardianDto): Observable<StudentGuardianDto> {
++        return this.http.post<any>(`${this.baseUrl}/api/services/app/Student/AddGuardian?studentId=${studentId}`, body).pipe(map(unwrap));
++    }
++
++    removeGuardian(studentGuardianId: number): Observable<void> {
++        return this.http.post<void>(`${this.baseUrl}/api/services/app/Student/RemoveGuardian?studentGuardianId=${studentGuardianId}`, null);
++    }
++
++    getGuardians(studentId: number): Observable<StudentGuardianDto[]> {
++        return this.http.get<any>(`${this.baseUrl}/api/services/app/Student/GetGuardians?studentId=${studentId}`).pipe(map(unwrap));
++    }
+ }
+ 
+ @Injectable()
+diff --git a/aspnet-core/src/Nexora.Application/Admissions/AdmissionApplicationAppService.cs b/aspnet-core/src/Nexora.Application/Admissions/AdmissionApplicationAppService.cs
+index 2615200..5304381 100644
+--- a/aspnet-core/src/Nexora.Application/Admissions/AdmissionApplicationAppService.cs
++++ b/aspnet-core/src/Nexora.Application/Admissions/AdmissionApplicationAppService.cs
+@@ -1,4 +1,5 @@
+ using System;
++using System.Collections.Generic;
+ using System.Linq;
+ using System.Threading.Tasks;
+ using Abp.Application.Services;
+@@ -29,19 +30,28 @@ public class AdmissionApplicationAppService
+     private readonly IRepository<Student, long> _studentRepository;
+     private readonly IRepository<StudentGuardian, long> _studentGuardianRepository;
+     private readonly IRepository<EnrollmentHistory, long> _enrollmentHistoryRepository;
++    private readonly IRepository<ApplicationDocument, long> _documentRepository;
++    private readonly IRepository<AdmissionAssessment, long> _assessmentRepository;
++    private readonly GuardianManager _guardianManager;
+ 
+     public AdmissionApplicationAppService(
+         IRepository<AdmissionApplication, long> repository,
+         IRepository<ApplicationGuardian, long> applicationGuardianRepository,
+         IRepository<Student, long> studentRepository,
+         IRepository<StudentGuardian, long> studentGuardianRepository,
+-        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository)
++        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository,
++        IRepository<ApplicationDocument, long> documentRepository,
++        IRepository<AdmissionAssessment, long> assessmentRepository,
++        GuardianManager guardianManager)
+         : base(repository)
+     {
+         _applicationGuardianRepository = applicationGuardianRepository;
+         _studentRepository = studentRepository;
+         _studentGuardianRepository = studentGuardianRepository;
+         _enrollmentHistoryRepository = enrollmentHistoryRepository;
++        _documentRepository = documentRepository;
++        _assessmentRepository = assessmentRepository;
++        _guardianManager = guardianManager;
+     }
+ 
+     [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_Create)]
+@@ -190,6 +200,157 @@ public class AdmissionApplicationAppService
+         return ObjectMapper.Map<StudentListDto>(student);
+     }
+ 
++    // ── Guardians ────────────────────────────────────────────────────────────
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageGuardians)]
++    public async Task<ApplicationGuardianDto> AddGuardianAsync(long applicationId, CreateGuardianDto input)
++    {
++        var application = await Repository.GetAsync(applicationId);
++        var guardian = await _guardianManager.FindOrCreateAsync(input);
++
++        var link = new ApplicationGuardian
++        {
++            ApplicationId = application.Id,
++            GuardianId = guardian.Id,
++            IsPrimaryContact = input.IsPrimaryContact
++        };
++
++        await _applicationGuardianRepository.InsertAsync(link);
++        await CurrentUnitOfWork.SaveChangesAsync();
++
++        return new ApplicationGuardianDto
++        {
++            Id = link.Id,
++            GuardianId = guardian.Id,
++            FullName = guardian.FullName,
++            Relationship = guardian.Relationship,
++            NationalIdNumber = guardian.NationalIdNumber,
++            Email = guardian.Email,
++            Phone = guardian.Phone,
++            Occupation = guardian.Occupation,
++            IsPrimaryContact = link.IsPrimaryContact
++        };
++    }
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageGuardians)]
++    public async Task RemoveGuardianAsync(long applicationGuardianId)
++    {
++        await _applicationGuardianRepository.DeleteAsync(applicationGuardianId);
++    }
++
++    public async Task<List<ApplicationGuardianDto>> GetGuardiansAsync(long applicationId)
++    {
++        var links = await _applicationGuardianRepository.GetAll()
++            .Include(ag => ag.Guardian)
++            .Where(ag => ag.ApplicationId == applicationId)
++            .ToListAsync();
++
++        return links.Select(ag => new ApplicationGuardianDto
++        {
++            Id = ag.Id,
++            GuardianId = ag.GuardianId,
++            FullName = ag.Guardian.FullName,
++            Relationship = ag.Guardian.Relationship,
++            NationalIdNumber = ag.Guardian.NationalIdNumber,
++            Email = ag.Guardian.Email,
++            Phone = ag.Guardian.Phone,
++            Occupation = ag.Guardian.Occupation,
++            IsPrimaryContact = ag.IsPrimaryContact
++        }).ToList();
++    }
++
++    // ── Documents ────────────────────────────────────────────────────────────
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageDocuments)]
++    public async Task<ApplicationDocumentDto> AddDocumentAsync(long applicationId, CreateApplicationDocumentDto input)
++    {
++        var doc = new ApplicationDocument
++        {
++            ApplicationId = applicationId,
++            DocumentType = input.DocumentType,
++            FileName = input.FileName,
++            FileUrl = input.FileUrl,
++            FileSizeKb = input.FileSizeKb,
++            UploadedDate = DateTime.Now,
++            VerificationStatus = VerificationStatus.Pending
++        };
++
++        await _documentRepository.InsertAsync(doc);
++        await CurrentUnitOfWork.SaveChangesAsync();
++
++        return ObjectMapper.Map<ApplicationDocumentDto>(doc);
++    }
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageDocuments)]
++    public async Task RemoveDocumentAsync(long documentId)
++    {
++        await _documentRepository.DeleteAsync(documentId);
++    }
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_VerifyDocument)]
++    public async Task<ApplicationDocumentDto> VerifyDocumentAsync(long documentId, VerifyDocumentDto input)
++    {
++        var doc = await _documentRepository.GetAsync(documentId);
++        doc.VerificationStatus = input.VerificationStatus;
++        doc.VerifiedByUserId = AbpSession.UserId;
++        doc.VerifiedDate = DateTime.Now;
++        doc.RejectionNote = input.RejectionNote;
++        return ObjectMapper.Map<ApplicationDocumentDto>(doc);
++    }
++
++    public async Task<List<ApplicationDocumentDto>> GetDocumentsAsync(long applicationId)
++    {
++        var docs = await _documentRepository.GetAll()
++            .Where(d => d.ApplicationId == applicationId)
++            .OrderBy(d => d.DocumentType)
++            .ToListAsync();
++
++        return ObjectMapper.Map<List<ApplicationDocumentDto>>(docs);
++    }
++
++    // ── Assessments ──────────────────────────────────────────────────────────
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageAssessments)]
++    public async Task<AdmissionAssessmentDto> ScheduleAssessmentAsync(long applicationId, CreateAssessmentDto input)
++    {
++        var assessment = new AdmissionAssessment
++        {
++            ApplicationId = applicationId,
++            AssessmentType = input.AssessmentType,
++            ScheduledDate = input.ScheduledDate,
++            Result = AssessmentResult.Pending
++        };
++
++        await _assessmentRepository.InsertAsync(assessment);
++        await CurrentUnitOfWork.SaveChangesAsync();
++
++        return ObjectMapper.Map<AdmissionAssessmentDto>(assessment);
++    }
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_RecordAssessment)]
++    public async Task<AdmissionAssessmentDto> RecordAssessmentResultAsync(long assessmentId, RecordAssessmentResultDto input)
++    {
++        var assessment = await _assessmentRepository.GetAsync(assessmentId);
++        assessment.Score = input.Score;
++        assessment.MaxScore = input.MaxScore;
++        assessment.Remarks = input.Remarks;
++        assessment.Result = input.Result;
++        assessment.ConductedByUserId = AbpSession.UserId;
++        return ObjectMapper.Map<AdmissionAssessmentDto>(assessment);
++    }
++
++    public async Task<List<AdmissionAssessmentDto>> GetAssessmentsAsync(long applicationId)
++    {
++        var assessments = await _assessmentRepository.GetAll()
++            .Where(a => a.ApplicationId == applicationId)
++            .OrderBy(a => a.ScheduledDate)
++            .ToListAsync();
++
++        return ObjectMapper.Map<List<AdmissionAssessmentDto>>(assessments);
++    }
++
++    // ── Query helpers ────────────────────────────────────────────────────────
++
+     protected override IQueryable<AdmissionApplication> CreateFilteredQuery(PagedAdmissionApplicationRequestDto input)
+     {
+         return Repository
+diff --git a/aspnet-core/src/Nexora.Application/Admissions/Dto/CreateGuardianDto.cs b/aspnet-core/src/Nexora.Application/Admissions/Dto/CreateGuardianDto.cs
+index 6e1ee07..7645c37 100644
+--- a/aspnet-core/src/Nexora.Application/Admissions/Dto/CreateGuardianDto.cs
++++ b/aspnet-core/src/Nexora.Application/Admissions/Dto/CreateGuardianDto.cs
+@@ -28,4 +28,6 @@ public class CreateGuardianDto
+ 
+     [StringLength(300)]
+     public string Address { get; set; }
++
++    public bool IsPrimaryContact { get; set; }
+ }
+diff --git a/aspnet-core/src/Nexora.Application/Admissions/IAdmissionApplicationAppService.cs b/aspnet-core/src/Nexora.Application/Admissions/IAdmissionApplicationAppService.cs
+index 22ea910..e2d759f 100644
+--- a/aspnet-core/src/Nexora.Application/Admissions/IAdmissionApplicationAppService.cs
++++ b/aspnet-core/src/Nexora.Application/Admissions/IAdmissionApplicationAppService.cs
+@@ -1,3 +1,4 @@
++using System.Collections.Generic;
+ using System.Threading.Tasks;
+ using Abp.Application.Services;
+ using Abp.Application.Services.Dto;
+@@ -18,4 +19,20 @@ public interface IAdmissionApplicationAppService
+     Task ChangeStatusAsync(ChangeApplicationStatusDto input);
+ 
+     Task<StudentListDto> ConvertToStudentAsync(ConvertToStudentDto input);
++
++    // Guardians
++    Task<ApplicationGuardianDto> AddGuardianAsync(long applicationId, CreateGuardianDto input);
++    Task RemoveGuardianAsync(long applicationGuardianId);
++    Task<List<ApplicationGuardianDto>> GetGuardiansAsync(long applicationId);
++
++    // Documents
++    Task<ApplicationDocumentDto> AddDocumentAsync(long applicationId, CreateApplicationDocumentDto input);
++    Task RemoveDocumentAsync(long documentId);
++    Task<ApplicationDocumentDto> VerifyDocumentAsync(long documentId, VerifyDocumentDto input);
++    Task<List<ApplicationDocumentDto>> GetDocumentsAsync(long applicationId);
++
++    // Assessments
++    Task<AdmissionAssessmentDto> ScheduleAssessmentAsync(long applicationId, CreateAssessmentDto input);
++    Task<AdmissionAssessmentDto> RecordAssessmentResultAsync(long assessmentId, RecordAssessmentResultDto input);
++    Task<List<AdmissionAssessmentDto>> GetAssessmentsAsync(long applicationId);
+ }
+diff --git a/aspnet-core/src/Nexora.Application/Admissions/IStudentAppService.cs b/aspnet-core/src/Nexora.Application/Admissions/IStudentAppService.cs
+index a315ca1..a149d52 100644
+--- a/aspnet-core/src/Nexora.Application/Admissions/IStudentAppService.cs
++++ b/aspnet-core/src/Nexora.Application/Admissions/IStudentAppService.cs
+@@ -15,4 +15,10 @@ public interface IStudentAppService
+     Task<StudentDetailDto> GetDetailAsync(long id);
+ 
+     Task<List<EnrollmentHistoryDto>> GetEnrollmentHistoryAsync(long studentId);
++
++    Task<StudentGuardianDto> AddGuardianAsync(long studentId, CreateGuardianDto input);
++
++    Task RemoveGuardianAsync(long studentGuardianId);
++
++    Task<List<StudentGuardianDto>> GetGuardiansAsync(long studentId);
+ }
+diff --git a/aspnet-core/src/Nexora.Application/Admissions/StudentAppService.cs b/aspnet-core/src/Nexora.Application/Admissions/StudentAppService.cs
+index c67dcbc..85f69e4 100644
+--- a/aspnet-core/src/Nexora.Application/Admissions/StudentAppService.cs
++++ b/aspnet-core/src/Nexora.Application/Admissions/StudentAppService.cs
+@@ -25,13 +25,19 @@ public class StudentAppService
+       IStudentAppService
+ {
+     private readonly IRepository<EnrollmentHistory, long> _enrollmentHistoryRepository;
++    private readonly IRepository<StudentGuardian, long> _studentGuardianRepository;
++    private readonly GuardianManager _guardianManager;
+ 
+     public StudentAppService(
+         IRepository<Student, long> repository,
+-        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository)
++        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository,
++        IRepository<StudentGuardian, long> studentGuardianRepository,
++        GuardianManager guardianManager)
+         : base(repository)
+     {
+         _enrollmentHistoryRepository = enrollmentHistoryRepository;
++        _studentGuardianRepository = studentGuardianRepository;
++        _guardianManager = guardianManager;
+     }
+ 
+     [AbpAuthorize(PermissionNames.Pages_Admissions_Students_Create)]
+@@ -85,12 +91,72 @@ public class StudentAppService
+             .Include(h => h.GradeLevel)
+             .Include(h => h.Section)
+             .Where(h => h.StudentId == studentId)
+-            .OrderByDescending(h => h.EnrollmentDate)
++            .OrderByDescending(h => h.AcademicYear.StartDate)
+             .ToListAsync();
+ 
+         return ObjectMapper.Map<List<EnrollmentHistoryDto>>(histories);
+     }
+ 
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Students_ManageGuardians)]
++    public async Task<StudentGuardianDto> AddGuardianAsync(long studentId, CreateGuardianDto input)
++    {
++        var student = await Repository.GetAsync(studentId);
++        var guardian = await _guardianManager.FindOrCreateAsync(input);
++
++        var link = new StudentGuardian
++        {
++            StudentId = student.Id,
++            GuardianId = guardian.Id,
++            IsPrimaryContact = input.IsPrimaryContact,
++            CanPickupStudent = input.IsPrimaryContact
++        };
++
++        await _studentGuardianRepository.InsertAsync(link);
++        await CurrentUnitOfWork.SaveChangesAsync();
++
++        return new StudentGuardianDto
++        {
++            Id = link.Id,
++            GuardianId = guardian.Id,
++            FullName = guardian.FullName,
++            Relationship = guardian.Relationship,
++            NationalIdNumber = guardian.NationalIdNumber,
++            Email = guardian.Email,
++            Phone = guardian.Phone,
++            Occupation = guardian.Occupation,
++            IsPrimaryContact = link.IsPrimaryContact,
++            CanPickupStudent = link.CanPickupStudent
++        };
++    }
++
++    [AbpAuthorize(PermissionNames.Pages_Admissions_Students_ManageGuardians)]
++    public async Task RemoveGuardianAsync(long studentGuardianId)
++    {
++        await _studentGuardianRepository.DeleteAsync(studentGuardianId);
++    }
++
++    public async Task<List<StudentGuardianDto>> GetGuardiansAsync(long studentId)
++    {
++        var links = await _studentGuardianRepository.GetAll()
++            .Include(sg => sg.Guardian)
++            .Where(sg => sg.StudentId == studentId)
++            .ToListAsync();
++
++        return links.Select(sg => new StudentGuardianDto
++        {
++            Id = sg.Id,
++            GuardianId = sg.GuardianId,
++            FullName = sg.Guardian.FullName,
++            Relationship = sg.Guardian.Relationship,
++            NationalIdNumber = sg.Guardian.NationalIdNumber,
++            Email = sg.Guardian.Email,
++            Phone = sg.Guardian.Phone,
++            Occupation = sg.Guardian.Occupation,
++            IsPrimaryContact = sg.IsPrimaryContact,
++            CanPickupStudent = sg.CanPickupStudent
++        }).ToList();
++    }
++
+     protected override IQueryable<Student> CreateFilteredQuery(PagedStudentRequestDto input)
+     {
+         return Repository
+diff --git a/aspnet-core/src/Nexora.Core/Authorization/NexoraAuthorizationProvider.cs b/aspnet-core/src/Nexora.Core/Authorization/NexoraAuthorizationProvider.cs
+index 1fa490f..792ebdf 100644
+--- a/aspnet-core/src/Nexora.Core/Authorization/NexoraAuthorizationProvider.cs
++++ b/aspnet-core/src/Nexora.Core/Authorization/NexoraAuthorizationProvider.cs
+@@ -20,11 +20,17 @@ public class NexoraAuthorizationProvider : AuthorizationProvider
+         applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_Edit, L("EditAdmissionApplication"));
+         applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_Delete, L("DeleteAdmissionApplication"));
+         applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ChangeStatus, L("ChangeApplicationStatus"));
++        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ManageGuardians, L("ManageApplicationGuardians"));
++        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ManageDocuments, L("ManageApplicationDocuments"));
++        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_VerifyDocument, L("VerifyApplicationDocument"));
++        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_ManageAssessments, L("ManageApplicationAssessments"));
++        applications.CreateChildPermission(PermissionNames.Pages_Admissions_Applications_RecordAssessment, L("RecordAssessmentResult"));
+ 
+         var students = admissions.CreateChildPermission(PermissionNames.Pages_Admissions_Students, L("Students"));
+         students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_Create, L("CreateStudent"));
+         students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_Edit, L("EditStudent"));
+         students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_Delete, L("DeleteStudent"));
++        students.CreateChildPermission(PermissionNames.Pages_Admissions_Students_ManageGuardians, L("ManageStudentGuardians"));
+     }
+ 
+     private static ILocalizableString L(string name)
+diff --git a/aspnet-core/src/Nexora.Core/Authorization/PermissionNames.cs b/aspnet-core/src/Nexora.Core/Authorization/PermissionNames.cs
+index 954fc6e..a2029d1 100644
+--- a/aspnet-core/src/Nexora.Core/Authorization/PermissionNames.cs
++++ b/aspnet-core/src/Nexora.Core/Authorization/PermissionNames.cs
+@@ -18,8 +18,15 @@ public static class PermissionNames
+     public const string Pages_Admissions_Applications_Delete = "Pages.Admissions.Applications.Delete";
+     public const string Pages_Admissions_Applications_ChangeStatus = "Pages.Admissions.Applications.ChangeStatus";
+ 
++    public const string Pages_Admissions_Applications_ManageGuardians = "Pages.Admissions.Applications.ManageGuardians";
++    public const string Pages_Admissions_Applications_ManageDocuments = "Pages.Admissions.Applications.ManageDocuments";
++    public const string Pages_Admissions_Applications_VerifyDocument = "Pages.Admissions.Applications.VerifyDocument";
++    public const string Pages_Admissions_Applications_ManageAssessments = "Pages.Admissions.Applications.ManageAssessments";
++    public const string Pages_Admissions_Applications_RecordAssessment = "Pages.Admissions.Applications.RecordAssessment";
++
+     public const string Pages_Admissions_Students = "Pages.Admissions.Students";
+     public const string Pages_Admissions_Students_Create = "Pages.Admissions.Students.Create";
+     public const string Pages_Admissions_Students_Edit = "Pages.Admissions.Students.Edit";
+     public const string Pages_Admissions_Students_Delete = "Pages.Admissions.Students.Delete";
++    public const string Pages_Admissions_Students_ManageGuardians = "Pages.Admissions.Students.ManageGuardians";
+ }

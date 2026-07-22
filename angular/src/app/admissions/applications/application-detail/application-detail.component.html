@@ -1,0 +1,303 @@
+<div [@routerTransition]>
+
+    @if (loading) {
+        <div class="nx-card" style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+        </div>
+    }
+
+    @if (!loading && !application) {
+        <div class="nx-card" style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+            <i class="fas fa-exclamation-triangle" style="font-size:32px; margin-bottom:12px; display:block; opacity:.4;"></i>
+            Application not found.
+            <div style="margin-top:16px;">
+                <a routerLink="/app/admissions/applications" class="nx-btn nx-btn--secondary nx-btn--sm">Back to list</a>
+            </div>
+        </div>
+    }
+
+    @if (!loading && application) {
+
+        <!-- Page Header -->
+        <div class="nx-page-header">
+            <div>
+                <h1 class="nx-page-title">{{ application.firstName }} {{ application.lastName }}</h1>
+                <p class="nx-page-subtitle">
+                    <span style="font-family:monospace; font-weight:600; color:var(--nx-accent);">{{ application.applicationNumber }}</span>
+                    &nbsp;·&nbsp; {{ application.campusName }} &nbsp;·&nbsp; {{ application.academicYearName }}
+                </p>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span class="nx-status" [ngClass]="getStatusClass(application.status)">{{ getStatusLabel(application.status) }}</span>
+                <a routerLink="/app/admissions/applications" class="nx-btn nx-btn--ghost nx-btn--sm">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Tab Nav -->
+        <div style="display:flex; border-bottom:2px solid var(--nx-border); margin-bottom:20px; overflow-x:auto;">
+            @for (tab of tabs; track tab.id) {
+                <button
+                    (click)="activeTab = tab.id"
+                    style="padding:12px 20px; background:none; border:none; cursor:pointer; font-size:13.5px; font-weight:500; white-space:nowrap; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .15s, border-color .15s;"
+                    [style.color]="activeTab === tab.id ? 'var(--nx-accent)' : 'var(--nx-text-muted)'"
+                    [style.borderBottomColor]="activeTab === tab.id ? 'var(--nx-accent)' : 'transparent'">
+                    <i class="fas" [ngClass]="tab.icon" style="margin-right:6px;"></i>{{ tab.label }}
+                    @if (tabCount(tab.id) >= 0) {
+                        <span style="margin-left:5px; font-size:11px; background:var(--nx-surface-hover); border-radius:10px; padding:1px 6px;">{{ tabCount(tab.id) }}</span>
+                    }
+                </button>
+            }
+        </div>
+
+        <!-- ── Overview ────────────────────────────────────────────────────── -->
+        @if (activeTab === 'overview') {
+            <div class="nx-card">
+                <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
+                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Application Details</h3>
+                </div>
+                <div style="padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:20px;">
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Date of Birth</div>
+                        <div style="font-weight:500;">{{ application.dateOfBirth | date:'dd MMM yyyy' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Gender</div>
+                        <div style="font-weight:500;">{{ getGenderLabel(application.gender) }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Nationality</div>
+                        <div style="font-weight:500;">{{ application.nationality || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Religion</div>
+                        <div style="font-weight:500;">{{ application.religion || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Desired Grade</div>
+                        <div style="font-weight:500;">{{ application.desiredGradeLevelName }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Submitted</div>
+                        <div style="font-weight:500;">{{ application.submittedDate | date:'dd MMM yyyy' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Previous School</div>
+                        <div style="font-weight:500;">{{ application.previousSchoolName || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Previous Board</div>
+                        <div style="font-weight:500;">{{ application.previousSchoolBoard || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Previous Grade</div>
+                        <div style="font-weight:500;">{{ application.previousGradeLevel || '—' }}</div>
+                    </div>
+                    @if (application.reviewNotes) {
+                        <div style="grid-column:1/-1;">
+                            <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Review Notes</div>
+                            <div style="font-weight:500;">{{ application.reviewNotes }}</div>
+                        </div>
+                    }
+                    @if (application.rejectionReason) {
+                        <div style="grid-column:1/-1;">
+                            <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Rejection Reason</div>
+                            <div style="font-weight:500; color:#e53e3e;">{{ application.rejectionReason }}</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- ── Guardians ───────────────────────────────────────────────────── -->
+        @if (activeTab === 'guardians') {
+            <div class="nx-card">
+                <div style="padding:16px 24px; border-bottom:1px solid var(--nx-border); display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Guardians / Parents</h3>
+                    <button class="nx-btn nx-btn--primary nx-btn--sm" (click)="addGuardian()">
+                        <i class="fas fa-plus"></i> Add Guardian
+                    </button>
+                </div>
+                @if (!guardians.length) {
+                    <div style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+                        <i class="fas fa-users" style="font-size:28px; margin-bottom:12px; display:block; opacity:.3;"></i>
+                        No guardians on record. Click <strong>Add Guardian</strong> to add one.
+                    </div>
+                }
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr));">
+                    @for (g of guardians; track g.id) {
+                        <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border); border-right:1px solid var(--nx-border);">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                                <div>
+                                    <div style="font-weight:600; margin-bottom:2px;">{{ g.fullName }}</div>
+                                    <div style="font-size:12px; color:var(--nx-text-muted);">{{ getRelationshipLabel(g.relationship) }}</div>
+                                </div>
+                                <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+                                    @if (g.isPrimaryContact) {
+                                        <span class="nx-status nx-status--active" style="font-size:11px;">Primary</span>
+                                    }
+                                    <button class="nx-btn nx-btn--danger nx-btn--sm" (click)="removeGuardian(g)" title="Remove">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @if (g.phone) {
+                                <div style="font-size:13px; margin-bottom:4px;">
+                                    <i class="fas fa-phone" style="width:14px; color:var(--nx-text-muted);"></i> {{ g.phone }}
+                                </div>
+                            }
+                            @if (g.email) {
+                                <div style="font-size:13px; margin-bottom:4px;">
+                                    <i class="fas fa-envelope" style="width:14px; color:var(--nx-text-muted);"></i> {{ g.email }}
+                                </div>
+                            }
+                            @if (g.occupation) {
+                                <div style="font-size:13px; color:var(--nx-text-muted);">
+                                    <i class="fas fa-briefcase" style="width:14px;"></i> {{ g.occupation }}
+                                </div>
+                            }
+                            @if (g.nationalIdNumber) {
+                                <div style="font-size:11px; margin-top:8px; color:var(--nx-text-muted);">ID: {{ g.nationalIdNumber }}</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- ── Documents ───────────────────────────────────────────────────── -->
+        @if (activeTab === 'documents') {
+            <div class="nx-card">
+                <div style="padding:16px 24px; border-bottom:1px solid var(--nx-border); display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Documents</h3>
+                    <button class="nx-btn nx-btn--primary nx-btn--sm" (click)="addDocument()">
+                        <i class="fas fa-plus"></i> Add Document
+                    </button>
+                </div>
+                @if (!documents.length) {
+                    <div style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+                        <i class="fas fa-file-alt" style="font-size:28px; margin-bottom:12px; display:block; opacity:.3;"></i>
+                        No documents uploaded. Click <strong>Add Document</strong> to attach one.
+                    </div>
+                }
+                @if (documents.length) {
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+                            <thead>
+                                <tr style="background:var(--nx-surface-hover);">
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Type</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">File Name</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Size</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Uploaded</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Status</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (doc of documents; track doc.id) {
+                                    <tr style="border-bottom:1px solid var(--nx-border);">
+                                        <td style="padding:10px 16px;">{{ getDocTypeLabel(doc.documentType) }}</td>
+                                        <td style="padding:10px 16px;">
+                                            @if (doc.fileUrl) {
+                                                <a [href]="doc.fileUrl" target="_blank" style="color:var(--nx-accent);">
+                                                    <i class="fas fa-external-link-alt" style="font-size:11px; margin-right:4px;"></i>{{ doc.fileName }}
+                                                </a>
+                                            } @else {
+                                                {{ doc.fileName }}
+                                            }
+                                        </td>
+                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">
+                                            @if (doc.fileSizeKb) { {{ doc.fileSizeKb }} KB } @else { — }
+                                        </td>
+                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ doc.uploadedDate | date:'dd MMM yyyy' }}</td>
+                                        <td style="padding:10px 16px;">
+                                            <span class="nx-status" [ngClass]="getVerificationClass(doc.verificationStatus)">
+                                                {{ getVerificationLabel(doc.verificationStatus) }}
+                                            </span>
+                                            @if (doc.rejectionNote) {
+                                                <div style="font-size:11px; color:#e53e3e; margin-top:2px;">{{ doc.rejectionNote }}</div>
+                                            }
+                                        </td>
+                                        <td style="padding:10px 16px;">
+                                            <div style="display:flex; gap:6px;">
+                                                <button class="nx-btn nx-btn--secondary nx-btn--sm" (click)="verifyDocument(doc)" title="Review">
+                                                    <i class="fas fa-check-circle"></i> Review
+                                                </button>
+                                                <button class="nx-btn nx-btn--danger nx-btn--sm" (click)="removeDocument(doc)" title="Remove">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- ── Assessments ─────────────────────────────────────────────────── -->
+        @if (activeTab === 'assessments') {
+            <div class="nx-card">
+                <div style="padding:16px 24px; border-bottom:1px solid var(--nx-border); display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Assessments</h3>
+                    <button class="nx-btn nx-btn--primary nx-btn--sm" (click)="scheduleAssessment()">
+                        <i class="fas fa-plus"></i> Schedule Assessment
+                    </button>
+                </div>
+                @if (!assessments.length) {
+                    <div style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+                        <i class="fas fa-clipboard-check" style="font-size:28px; margin-bottom:12px; display:block; opacity:.3;"></i>
+                        No assessments scheduled yet.
+                    </div>
+                }
+                @if (assessments.length) {
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+                            <thead>
+                                <tr style="background:var(--nx-surface-hover);">
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Type</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Scheduled</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Score</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Result</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Remarks</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (a of assessments; track a.id) {
+                                    <tr style="border-bottom:1px solid var(--nx-border);">
+                                        <td style="padding:10px 16px; font-weight:500;">{{ getAssessmentTypeLabel(a.assessmentType) }}</td>
+                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">
+                                            @if (a.scheduledDate) { {{ a.scheduledDate | date:'dd MMM yyyy' }} } @else { — }
+                                        </td>
+                                        <td style="padding:10px 16px;">
+                                            @if (a.score != null) { {{ a.score }} / {{ a.maxScore ?? '?' }} } @else { — }
+                                        </td>
+                                        <td style="padding:10px 16px;">
+                                            <span class="nx-status" [ngClass]="getResultClass(a.result)">{{ getResultLabel(a.result) }}</span>
+                                        </td>
+                                        <td style="padding:10px 16px; color:var(--nx-text-muted); max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                            {{ a.remarks || '—' }}
+                                        </td>
+                                        <td style="padding:10px 16px;">
+                                            @if (a.result === AssessmentResult.Pending) {
+                                                <button class="nx-btn nx-btn--secondary nx-btn--sm" (click)="recordResult(a)">
+                                                    <i class="fas fa-pencil-alt"></i> Record Result
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+
+    }
+
+</div>

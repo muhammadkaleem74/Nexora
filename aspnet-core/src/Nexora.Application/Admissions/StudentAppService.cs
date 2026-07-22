@@ -25,13 +25,19 @@ public class StudentAppService
       IStudentAppService
 {
     private readonly IRepository<EnrollmentHistory, long> _enrollmentHistoryRepository;
+    private readonly IRepository<StudentGuardian, long> _studentGuardianRepository;
+    private readonly GuardianManager _guardianManager;
 
     public StudentAppService(
         IRepository<Student, long> repository,
-        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository)
+        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository,
+        IRepository<StudentGuardian, long> studentGuardianRepository,
+        GuardianManager guardianManager)
         : base(repository)
     {
         _enrollmentHistoryRepository = enrollmentHistoryRepository;
+        _studentGuardianRepository = studentGuardianRepository;
+        _guardianManager = guardianManager;
     }
 
     [AbpAuthorize(PermissionNames.Pages_Admissions_Students_Create)]
@@ -85,10 +91,70 @@ public class StudentAppService
             .Include(h => h.GradeLevel)
             .Include(h => h.Section)
             .Where(h => h.StudentId == studentId)
-            .OrderByDescending(h => h.EnrollmentDate)
+            .OrderByDescending(h => h.AcademicYear.StartDate)
             .ToListAsync();
 
         return ObjectMapper.Map<List<EnrollmentHistoryDto>>(histories);
+    }
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Students_ManageGuardians)]
+    public async Task<StudentGuardianDto> AddGuardianAsync(long studentId, CreateGuardianDto input)
+    {
+        var student = await Repository.GetAsync(studentId);
+        var guardian = await _guardianManager.FindOrCreateAsync(input);
+
+        var link = new StudentGuardian
+        {
+            StudentId = student.Id,
+            GuardianId = guardian.Id,
+            IsPrimaryContact = input.IsPrimaryContact,
+            CanPickupStudent = input.IsPrimaryContact
+        };
+
+        await _studentGuardianRepository.InsertAsync(link);
+        await CurrentUnitOfWork.SaveChangesAsync();
+
+        return new StudentGuardianDto
+        {
+            Id = link.Id,
+            GuardianId = guardian.Id,
+            FullName = guardian.FullName,
+            Relationship = guardian.Relationship,
+            NationalIdNumber = guardian.NationalIdNumber,
+            Email = guardian.Email,
+            Phone = guardian.Phone,
+            Occupation = guardian.Occupation,
+            IsPrimaryContact = link.IsPrimaryContact,
+            CanPickupStudent = link.CanPickupStudent
+        };
+    }
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Students_ManageGuardians)]
+    public async Task RemoveGuardianAsync(long studentGuardianId)
+    {
+        await _studentGuardianRepository.DeleteAsync(studentGuardianId);
+    }
+
+    public async Task<List<StudentGuardianDto>> GetGuardiansAsync(long studentId)
+    {
+        var links = await _studentGuardianRepository.GetAll()
+            .Include(sg => sg.Guardian)
+            .Where(sg => sg.StudentId == studentId)
+            .ToListAsync();
+
+        return links.Select(sg => new StudentGuardianDto
+        {
+            Id = sg.Id,
+            GuardianId = sg.GuardianId,
+            FullName = sg.Guardian.FullName,
+            Relationship = sg.Guardian.Relationship,
+            NationalIdNumber = sg.Guardian.NationalIdNumber,
+            Email = sg.Guardian.Email,
+            Phone = sg.Guardian.Phone,
+            Occupation = sg.Guardian.Occupation,
+            IsPrimaryContact = sg.IsPrimaryContact,
+            CanPickupStudent = sg.CanPickupStudent
+        }).ToList();
     }
 
     protected override IQueryable<Student> CreateFilteredQuery(PagedStudentRequestDto input)

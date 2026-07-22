@@ -105,12 +105,13 @@
                 <ng-template pTemplate="body" let-record="$implicit">
                     <tr>
                         <td>
-                            <span style="font-weight:600; font-family:monospace; font-size:13px;">
+                            <a (click)="openDetail(record)" href="javascript:;"
+                                style="font-weight:600; font-family:monospace; font-size:13px; color:var(--nx-accent); text-decoration:none;">
                                 {{ record.applicationNumber }}
-                            </span>
+                            </a>
                         </td>
                         <td>
-                            <div style="font-weight:500;">{{ record.firstName }} {{ record.lastName }}</div>
+                            <div style="font-weight:500; cursor:pointer;" (click)="openDetail(record)">{{ record.firstName }} {{ record.lastName }}</div>
                             <div style="font-size:12px; color:var(--nx-text-muted);">
                                 {{ record.gender === 1 ? 'Male' : record.gender === 2 ? 'Female' : 'Other' }}
                             </div>

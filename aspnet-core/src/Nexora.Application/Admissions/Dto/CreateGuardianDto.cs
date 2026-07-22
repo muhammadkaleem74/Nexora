@@ -28,4 +28,6 @@ public class CreateGuardianDto
 
     [StringLength(300)]
     public string Address { get; set; }
+
+    public bool IsPrimaryContact { get; set; }
 }

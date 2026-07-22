@@ -7,6 +7,7 @@ import { LazyLoadEvent, PrimeTemplate } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { Paginator, PaginatorModule } from 'primeng/paginator';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DatePipe, NgClass, NgIf } from '@angular/common';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
 import {
@@ -61,9 +62,14 @@ export class ApplicationsComponent extends PagedListingComponentBase<AdmissionAp
         private _applicationService: AdmissionApplicationServiceProxy,
         private _campusService: CampusServiceProxy,
         private _academicYearService: AcademicYearServiceProxy,
-        private _modalService: BsModalService
+        private _modalService: BsModalService,
+        private _router: Router
     ) {
         super(injector, cd);
+    }
+
+    openDetail(record: AdmissionApplicationListDto): void {
+        this._router.navigate(['/app/admissions/applications', record.id]);
     }
 
     ngOnInit(): void {

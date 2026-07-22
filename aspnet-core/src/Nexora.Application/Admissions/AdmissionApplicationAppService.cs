@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
@@ -29,19 +30,28 @@ public class AdmissionApplicationAppService
     private readonly IRepository<Student, long> _studentRepository;
     private readonly IRepository<StudentGuardian, long> _studentGuardianRepository;
     private readonly IRepository<EnrollmentHistory, long> _enrollmentHistoryRepository;
+    private readonly IRepository<ApplicationDocument, long> _documentRepository;
+    private readonly IRepository<AdmissionAssessment, long> _assessmentRepository;
+    private readonly GuardianManager _guardianManager;
 
     public AdmissionApplicationAppService(
         IRepository<AdmissionApplication, long> repository,
         IRepository<ApplicationGuardian, long> applicationGuardianRepository,
         IRepository<Student, long> studentRepository,
         IRepository<StudentGuardian, long> studentGuardianRepository,
-        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository)
+        IRepository<EnrollmentHistory, long> enrollmentHistoryRepository,
+        IRepository<ApplicationDocument, long> documentRepository,
+        IRepository<AdmissionAssessment, long> assessmentRepository,
+        GuardianManager guardianManager)
         : base(repository)
     {
         _applicationGuardianRepository = applicationGuardianRepository;
         _studentRepository = studentRepository;
         _studentGuardianRepository = studentGuardianRepository;
         _enrollmentHistoryRepository = enrollmentHistoryRepository;
+        _documentRepository = documentRepository;
+        _assessmentRepository = assessmentRepository;
+        _guardianManager = guardianManager;
     }
 
     [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_Create)]
@@ -189,6 +199,157 @@ public class AdmissionApplicationAppService
 
         return ObjectMapper.Map<StudentListDto>(student);
     }
+
+    // ── Guardians ────────────────────────────────────────────────────────────
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageGuardians)]
+    public async Task<ApplicationGuardianDto> AddGuardianAsync(long applicationId, CreateGuardianDto input)
+    {
+        var application = await Repository.GetAsync(applicationId);
+        var guardian = await _guardianManager.FindOrCreateAsync(input);
+
+        var link = new ApplicationGuardian
+        {
+            ApplicationId = application.Id,
+            GuardianId = guardian.Id,
+            IsPrimaryContact = input.IsPrimaryContact
+        };
+
+        await _applicationGuardianRepository.InsertAsync(link);
+        await CurrentUnitOfWork.SaveChangesAsync();
+
+        return new ApplicationGuardianDto
+        {
+            Id = link.Id,
+            GuardianId = guardian.Id,
+            FullName = guardian.FullName,
+            Relationship = guardian.Relationship,
+            NationalIdNumber = guardian.NationalIdNumber,
+            Email = guardian.Email,
+            Phone = guardian.Phone,
+            Occupation = guardian.Occupation,
+            IsPrimaryContact = link.IsPrimaryContact
+        };
+    }
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageGuardians)]
+    public async Task RemoveGuardianAsync(long applicationGuardianId)
+    {
+        await _applicationGuardianRepository.DeleteAsync(applicationGuardianId);
+    }
+
+    public async Task<List<ApplicationGuardianDto>> GetGuardiansAsync(long applicationId)
+    {
+        var links = await _applicationGuardianRepository.GetAll()
+            .Include(ag => ag.Guardian)
+            .Where(ag => ag.ApplicationId == applicationId)
+            .ToListAsync();
+
+        return links.Select(ag => new ApplicationGuardianDto
+        {
+            Id = ag.Id,
+            GuardianId = ag.GuardianId,
+            FullName = ag.Guardian.FullName,
+            Relationship = ag.Guardian.Relationship,
+            NationalIdNumber = ag.Guardian.NationalIdNumber,
+            Email = ag.Guardian.Email,
+            Phone = ag.Guardian.Phone,
+            Occupation = ag.Guardian.Occupation,
+            IsPrimaryContact = ag.IsPrimaryContact
+        }).ToList();
+    }
+
+    // ── Documents ────────────────────────────────────────────────────────────
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageDocuments)]
+    public async Task<ApplicationDocumentDto> AddDocumentAsync(long applicationId, CreateApplicationDocumentDto input)
+    {
+        var doc = new ApplicationDocument
+        {
+            ApplicationId = applicationId,
+            DocumentType = input.DocumentType,
+            FileName = input.FileName,
+            FileUrl = input.FileUrl,
+            FileSizeKb = input.FileSizeKb,
+            UploadedDate = DateTime.Now,
+            VerificationStatus = VerificationStatus.Pending
+        };
+
+        await _documentRepository.InsertAsync(doc);
+        await CurrentUnitOfWork.SaveChangesAsync();
+
+        return ObjectMapper.Map<ApplicationDocumentDto>(doc);
+    }
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageDocuments)]
+    public async Task RemoveDocumentAsync(long documentId)
+    {
+        await _documentRepository.DeleteAsync(documentId);
+    }
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_VerifyDocument)]
+    public async Task<ApplicationDocumentDto> VerifyDocumentAsync(long documentId, VerifyDocumentDto input)
+    {
+        var doc = await _documentRepository.GetAsync(documentId);
+        doc.VerificationStatus = input.VerificationStatus;
+        doc.VerifiedByUserId = AbpSession.UserId;
+        doc.VerifiedDate = DateTime.Now;
+        doc.RejectionNote = input.RejectionNote;
+        return ObjectMapper.Map<ApplicationDocumentDto>(doc);
+    }
+
+    public async Task<List<ApplicationDocumentDto>> GetDocumentsAsync(long applicationId)
+    {
+        var docs = await _documentRepository.GetAll()
+            .Where(d => d.ApplicationId == applicationId)
+            .OrderBy(d => d.DocumentType)
+            .ToListAsync();
+
+        return ObjectMapper.Map<List<ApplicationDocumentDto>>(docs);
+    }
+
+    // ── Assessments ──────────────────────────────────────────────────────────
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_ManageAssessments)]
+    public async Task<AdmissionAssessmentDto> ScheduleAssessmentAsync(long applicationId, CreateAssessmentDto input)
+    {
+        var assessment = new AdmissionAssessment
+        {
+            ApplicationId = applicationId,
+            AssessmentType = input.AssessmentType,
+            ScheduledDate = input.ScheduledDate,
+            Result = AssessmentResult.Pending
+        };
+
+        await _assessmentRepository.InsertAsync(assessment);
+        await CurrentUnitOfWork.SaveChangesAsync();
+
+        return ObjectMapper.Map<AdmissionAssessmentDto>(assessment);
+    }
+
+    [AbpAuthorize(PermissionNames.Pages_Admissions_Applications_RecordAssessment)]
+    public async Task<AdmissionAssessmentDto> RecordAssessmentResultAsync(long assessmentId, RecordAssessmentResultDto input)
+    {
+        var assessment = await _assessmentRepository.GetAsync(assessmentId);
+        assessment.Score = input.Score;
+        assessment.MaxScore = input.MaxScore;
+        assessment.Remarks = input.Remarks;
+        assessment.Result = input.Result;
+        assessment.ConductedByUserId = AbpSession.UserId;
+        return ObjectMapper.Map<AdmissionAssessmentDto>(assessment);
+    }
+
+    public async Task<List<AdmissionAssessmentDto>> GetAssessmentsAsync(long applicationId)
+    {
+        var assessments = await _assessmentRepository.GetAll()
+            .Where(a => a.ApplicationId == applicationId)
+            .OrderBy(a => a.ScheduledDate)
+            .ToListAsync();
+
+        return ObjectMapper.Map<List<AdmissionAssessmentDto>>(assessments);
+    }
+
+    // ── Query helpers ────────────────────────────────────────────────────────
 
     protected override IQueryable<AdmissionApplication> CreateFilteredQuery(PagedAdmissionApplicationRequestDto input)
     {

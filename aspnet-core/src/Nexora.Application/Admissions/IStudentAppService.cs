@@ -15,4 +15,10 @@ public interface IStudentAppService
     Task<StudentDetailDto> GetDetailAsync(long id);
 
     Task<List<EnrollmentHistoryDto>> GetEnrollmentHistoryAsync(long studentId);
+
+    Task<StudentGuardianDto> AddGuardianAsync(long studentId, CreateGuardianDto input);
+
+    Task RemoveGuardianAsync(long studentGuardianId);
+
+    Task<List<StudentGuardianDto>> GetGuardiansAsync(long studentId);
 }

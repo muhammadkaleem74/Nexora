@@ -6,6 +6,16 @@
         </div>
     }
 
+    @if (!loading && !student) {
+        <div class="nx-card" style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+            <i class="fas fa-exclamation-triangle" style="font-size:32px; margin-bottom:12px; display:block; opacity:.4;"></i>
+            Student not found.
+            <div style="margin-top:16px;">
+                <a routerLink="/app/admissions/students" class="nx-btn nx-btn--secondary nx-btn--sm">Back to list</a>
+            </div>
+        </div>
+    }
+
     @if (!loading && student) {
 
         <!-- Page Header -->
@@ -13,8 +23,9 @@
             <div>
                 <h1 class="nx-page-title">{{ student.firstName }} {{ student.lastName }}</h1>
                 <p class="nx-page-subtitle">
-                    Reg: <strong>{{ student.registrationNumber }}</strong>
-                    &nbsp;·&nbsp; GR: <strong>{{ student.grNumber }}</strong>
+                    <span style="font-family:monospace; font-weight:600; color:var(--nx-accent);">{{ student.registrationNumber }}</span>
+                    &nbsp;·&nbsp; GR: <span style="font-family:monospace;">{{ student.grNumber }}</span>
+                    &nbsp;·&nbsp; {{ student.campusName }}
                 </p>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
@@ -25,131 +36,172 @@
             </div>
         </div>
 
-        <!-- Personal Info -->
-        <div class="nx-card" style="margin-bottom:16px;">
-            <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
-                <h3 style="font-size:14px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.05em; margin:0;">
-                    Personal Information
-                </h3>
-            </div>
-            <div style="padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:20px;">
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Date of Birth</div>
-                    <div style="font-weight:500;">{{ student.dateOfBirth | date:'dd MMM yyyy' }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Gender</div>
-                    <div style="font-weight:500;">{{ getGenderLabel(student.gender) }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Blood Group</div>
-                    <div style="font-weight:500;">{{ student.bloodGroup || '—' }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Nationality</div>
-                    <div style="font-weight:500;">{{ student.nationality || '—' }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Religion</div>
-                    <div style="font-weight:500;">{{ student.religion || '—' }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Campus</div>
-                    <div style="font-weight:500;">{{ student.campusName }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Current Grade</div>
-                    <div style="font-weight:500;">{{ student.currentGradeLevelName }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Section</div>
-                    <div style="font-weight:500;">{{ student.currentSectionName || '—' }}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Enrolled On</div>
-                    <div style="font-weight:500;">{{ student.enrollmentDate | date:'dd MMM yyyy' }}</div>
-                </div>
-            </div>
+        <!-- Tab Nav -->
+        <div style="display:flex; border-bottom:2px solid var(--nx-border); margin-bottom:20px; overflow-x:auto;">
+            @for (tab of tabs; track tab.id) {
+                <button
+                    (click)="activeTab = tab.id"
+                    style="padding:12px 20px; background:none; border:none; cursor:pointer; font-size:13.5px; font-weight:500; white-space:nowrap; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .15s, border-color .15s;"
+                    [style.color]="activeTab === tab.id ? 'var(--nx-accent)' : 'var(--nx-text-muted)'"
+                    [style.borderBottomColor]="activeTab === tab.id ? 'var(--nx-accent)' : 'transparent'">
+                    <i class="fas" [ngClass]="tab.icon" style="margin-right:6px;"></i>{{ tab.label }}
+                    @if (tabCount(tab.id) >= 0) {
+                        <span style="margin-left:5px; font-size:11px; background:var(--nx-surface-hover); border-radius:10px; padding:1px 6px;">{{ tabCount(tab.id) }}</span>
+                    }
+                </button>
+            }
         </div>
 
-        <!-- Guardians -->
-        <div class="nx-card" style="margin-bottom:16px;">
-            <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
-                <h3 style="font-size:14px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.05em; margin:0;">
-                    Guardians / Parents
-                </h3>
+        <!-- ── Overview ────────────────────────────────────────────────────── -->
+        @if (activeTab === 'overview') {
+            <div class="nx-card">
+                <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
+                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Personal Information</h3>
+                </div>
+                <div style="padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:20px;">
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Date of Birth</div>
+                        <div style="font-weight:500;">{{ student.dateOfBirth | date:'dd MMM yyyy' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Gender</div>
+                        <div style="font-weight:500;">{{ getGenderLabel(student.gender) }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Blood Group</div>
+                        <div style="font-weight:500;">{{ student.bloodGroup || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Nationality</div>
+                        <div style="font-weight:500;">{{ student.nationality || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Religion</div>
+                        <div style="font-weight:500;">{{ student.religion || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Grade Level</div>
+                        <div style="font-weight:500;">{{ student.currentGradeLevelName }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Section</div>
+                        <div style="font-weight:500;">{{ student.currentSectionName || '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--nx-text-muted); margin-bottom:4px;">Enrollment Date</div>
+                        <div style="font-weight:500;">{{ student.enrollmentDate | date:'dd MMM yyyy' }}</div>
+                    </div>
+                </div>
             </div>
-            @if (!student.guardians?.length) {
-                <div style="padding:32px; text-align:center; color:var(--nx-text-muted);">No guardians on record.</div>
-            }
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:0;">
-                @for (g of student.guardians; track g.id) {
-                    <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <span style="font-weight:600;">{{ g.fullName }}</span>
-                            @if (g.isPrimaryContact) {
-                                <span class="nx-status nx-status--active" style="font-size:11px;">Primary</span>
+        }
+
+        <!-- ── Guardians ───────────────────────────────────────────────────── -->
+        @if (activeTab === 'guardians') {
+            <div class="nx-card">
+                <div style="padding:16px 24px; border-bottom:1px solid var(--nx-border); display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Guardians / Parents</h3>
+                    <button class="nx-btn nx-btn--primary nx-btn--sm" (click)="addGuardian()">
+                        <i class="fas fa-plus"></i> Add Guardian
+                    </button>
+                </div>
+                @if (!guardians.length) {
+                    <div style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+                        <i class="fas fa-users" style="font-size:28px; margin-bottom:12px; display:block; opacity:.3;"></i>
+                        No guardians on record. Click <strong>Add Guardian</strong> to add one.
+                    </div>
+                }
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr));">
+                    @for (g of guardians; track g.id) {
+                        <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border); border-right:1px solid var(--nx-border);">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                                <div>
+                                    <div style="font-weight:600; margin-bottom:2px;">{{ g.fullName }}</div>
+                                    <div style="font-size:12px; color:var(--nx-text-muted);">{{ getRelationshipLabel(g.relationship) }}</div>
+                                </div>
+                                <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+                                    @if (g.isPrimaryContact) {
+                                        <span class="nx-status nx-status--active" style="font-size:11px;">Primary</span>
+                                    }
+                                    <button class="nx-btn nx-btn--danger nx-btn--sm" (click)="removeGuardian(g)" title="Remove">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @if (g.phone) {
+                                <div style="font-size:13px; margin-bottom:4px;">
+                                    <i class="fas fa-phone" style="width:14px; color:var(--nx-text-muted);"></i> {{ g.phone }}
+                                </div>
+                            }
+                            @if (g.email) {
+                                <div style="font-size:13px; margin-bottom:4px;">
+                                    <i class="fas fa-envelope" style="width:14px; color:var(--nx-text-muted);"></i> {{ g.email }}
+                                </div>
+                            }
+                            @if (g.occupation) {
+                                <div style="font-size:13px; color:var(--nx-text-muted);">
+                                    <i class="fas fa-briefcase" style="width:14px;"></i> {{ g.occupation }}
+                                </div>
+                            }
+                            @if (g.nationalIdNumber) {
+                                <div style="font-size:11px; margin-top:8px; color:var(--nx-text-muted);">ID: {{ g.nationalIdNumber }}</div>
+                            }
+                            @if (g.canPickupStudent) {
+                                <div style="font-size:12px; margin-top:8px; color:var(--nx-accent);">
+                                    <i class="fas fa-check-circle"></i> Authorised for pickup
+                                </div>
                             }
                         </div>
-                        <div style="font-size:13px; color:var(--nx-text-muted); margin-bottom:4px;">
-                            {{ getRelationshipLabel(g.relationship) }}
-                        </div>
-                        @if (g.phone) { <div style="font-size:13px;"><i class="fas fa-phone" style="width:14px;"></i> {{ g.phone }}</div> }
-                        @if (g.email) { <div style="font-size:13px;"><i class="fas fa-envelope" style="width:14px;"></i> {{ g.email }}</div> }
-                        @if (g.canPickupStudent) {
-                            <div style="font-size:12px; margin-top:8px; color:var(--nx-accent);">
-                                <i class="fas fa-check-circle"></i> Authorised for pickup
-                            </div>
-                        }
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- ── Enrollment History ──────────────────────────────────────────── -->
+        @if (activeTab === 'history') {
+            <div class="nx-card">
+                <div style="padding:16px 24px; border-bottom:1px solid var(--nx-border);">
+                    <h3 style="font-size:13px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.06em; margin:0;">Enrollment History</h3>
+                </div>
+                @if (!history.length) {
+                    <div style="padding:48px; text-align:center; color:var(--nx-text-muted);">
+                        <i class="fas fa-history" style="font-size:28px; margin-bottom:12px; display:block; opacity:.3;"></i>
+                        No enrollment history available.
+                    </div>
+                }
+                @if (history.length) {
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+                            <thead>
+                                <tr style="background:var(--nx-surface-hover);">
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Academic Year</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Grade</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Section</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Enrolled</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Outcome</th>
+                                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (h of history; track h.id) {
+                                    <tr style="border-bottom:1px solid var(--nx-border);">
+                                        <td style="padding:10px 16px; font-weight:500;">{{ h.academicYearName }}</td>
+                                        <td style="padding:10px 16px;">{{ h.gradeLevelName }}</td>
+                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.sectionName || '—' }}</td>
+                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.enrollmentDate | date:'dd MMM yyyy' }}</td>
+                                        <td style="padding:10px 16px;">
+                                            <span class="nx-status" [ngClass]="getPromotionClass(h.promotionStatus)">
+                                                {{ getPromotionLabel(h.promotionStatus) }}
+                                            </span>
+                                        </td>
+                                        <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.remarks || '—' }}</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 }
             </div>
-        </div>
-
-        <!-- Enrollment History -->
-        <div class="nx-card">
-            <div style="padding:20px 24px; border-bottom:1px solid var(--nx-border);">
-                <h3 style="font-size:14px; font-weight:600; color:var(--nx-text-muted); text-transform:uppercase; letter-spacing:.05em; margin:0;">
-                    Enrollment History
-                </h3>
-            </div>
-            @if (!student.enrollmentHistories?.length) {
-                <div style="padding:32px; text-align:center; color:var(--nx-text-muted);">No history available.</div>
-            }
-            <div style="overflow-x:auto;">
-                <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
-                    <thead>
-                        <tr style="background:var(--nx-surface-hover);">
-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Academic Year</th>
-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Grade</th>
-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Section</th>
-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Enrolled</th>
-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Outcome</th>
-                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--nx-text-muted); border-bottom:1px solid var(--nx-border);">Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (h of student.enrollmentHistories; track h.id) {
-                            <tr style="border-bottom:1px solid var(--nx-border);">
-                                <td style="padding:10px 16px;">{{ h.academicYearName }}</td>
-                                <td style="padding:10px 16px;">{{ h.gradeLevelName }}</td>
-                                <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.sectionName || '—' }}</td>
-                                <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.enrollmentDate | date:'dd MMM yyyy' }}</td>
-                                <td style="padding:10px 16px;">
-                                    <span class="nx-status"
-                                        [class.nx-status--active]="h.promotionStatus === PromotionStatus.Promoted"
-                                        [class.nx-status--inactive]="h.promotionStatus === PromotionStatus.Retained || h.promotionStatus === PromotionStatus.Withdrawn"
-                                        [class.nx-status--pending]="h.promotionStatus === PromotionStatus.Transferred">
-                                        {{ getPromotionLabel(h.promotionStatus) }}
-                                    </span>
-                                </td>
-                                <td style="padding:10px 16px; color:var(--nx-text-muted);">{{ h.remarks || '—' }}</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        }
 
     }
 

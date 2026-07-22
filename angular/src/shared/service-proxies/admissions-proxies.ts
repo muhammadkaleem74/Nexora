@@ -44,6 +44,35 @@ export enum PromotionStatus {
     Withdrawn = 4,
 }
 
+export enum DocumentType {
+    BirthCertificate = 1,
+    PassportPhoto = 2,
+    PreviousSchoolReport = 3,
+    MedicalRecord = 4,
+    NationalId = 5,
+    Other = 99,
+}
+
+export enum VerificationStatus {
+    Pending = 0,
+    Verified = 1,
+    Rejected = 2,
+}
+
+export enum AssessmentType {
+    Written = 1,
+    Oral = 2,
+    Practical = 3,
+    Interview = 4,
+}
+
+export enum AssessmentResult {
+    Pending = 0,
+    Pass = 1,
+    Fail = 2,
+    Conditional = 3,
+}
+
 // ── Shared paged result ───────────────────────────────────────────────────────
 
 export interface PagedResult<T> {
@@ -149,22 +178,63 @@ export interface AdmissionApplicationDetailDto extends AdmissionApplicationListD
 
 export interface ApplicationDocumentDto {
     id: number;
-    documentType: number;
+    applicationId: number;
+    documentType: DocumentType;
     fileName: string;
     fileUrl: string;
     fileSizeKb: number | undefined;
     uploadedDate: string;
-    verificationStatus: number;
+    verificationStatus: VerificationStatus;
+    verifiedByUserId: number | undefined;
+    verifiedDate: string | undefined;
+    rejectionNote: string;
 }
 
 export interface AdmissionAssessmentDto {
     id: number;
-    assessmentType: number;
+    applicationId: number;
+    assessmentType: AssessmentType;
     scheduledDate: string | undefined;
+    conductedByUserId: number | undefined;
     score: number | undefined;
     maxScore: number | undefined;
     remarks: string;
-    result: number;
+    result: AssessmentResult;
+}
+
+export interface CreateGuardianDto {
+    fullName: string;
+    relationship: GuardianRelationship;
+    nationalIdNumber: string;
+    email: string;
+    phone: string;
+    occupation: string;
+    address: string;
+    isPrimaryContact: boolean;
+}
+
+export interface CreateApplicationDocumentDto {
+    documentType: DocumentType;
+    fileName: string;
+    fileUrl: string;
+    fileSizeKb: number | undefined;
+}
+
+export interface VerifyDocumentDto {
+    verificationStatus: VerificationStatus;
+    rejectionNote: string;
+}
+
+export interface CreateAssessmentDto {
+    assessmentType: AssessmentType;
+    scheduledDate: string | undefined;
+}
+
+export interface RecordAssessmentResultDto {
+    score: number | undefined;
+    maxScore: number | undefined;
+    remarks: string;
+    result: AssessmentResult;
 }
 
 export interface CreateAdmissionApplicationDto {
@@ -326,6 +396,52 @@ export class AdmissionApplicationServiceProxy {
     convertToStudent(body: ConvertToStudentDto): Observable<StudentListDto> {
         return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/ConvertToStudent`, body).pipe(map(unwrap));
     }
+
+    // ── Guardians ─────────────────────────────────────────────────────────────
+
+    addGuardian(applicationId: number, body: CreateGuardianDto): Observable<ApplicationGuardianDto> {
+        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/AddGuardian?applicationId=${applicationId}`, body).pipe(map(unwrap));
+    }
+
+    removeGuardian(applicationGuardianId: number): Observable<void> {
+        return this.http.post<void>(`${this.baseUrl}/api/services/app/AdmissionApplication/RemoveGuardian?applicationGuardianId=${applicationGuardianId}`, null);
+    }
+
+    getGuardians(applicationId: number): Observable<ApplicationGuardianDto[]> {
+        return this.http.get<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/GetGuardians?applicationId=${applicationId}`).pipe(map(unwrap));
+    }
+
+    // ── Documents ─────────────────────────────────────────────────────────────
+
+    addDocument(applicationId: number, body: CreateApplicationDocumentDto): Observable<ApplicationDocumentDto> {
+        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/AddDocument?applicationId=${applicationId}`, body).pipe(map(unwrap));
+    }
+
+    removeDocument(documentId: number): Observable<void> {
+        return this.http.post<void>(`${this.baseUrl}/api/services/app/AdmissionApplication/RemoveDocument?documentId=${documentId}`, null);
+    }
+
+    verifyDocument(documentId: number, body: VerifyDocumentDto): Observable<ApplicationDocumentDto> {
+        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/VerifyDocument?documentId=${documentId}`, body).pipe(map(unwrap));
+    }
+
+    getDocuments(applicationId: number): Observable<ApplicationDocumentDto[]> {
+        return this.http.get<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/GetDocuments?applicationId=${applicationId}`).pipe(map(unwrap));
+    }
+
+    // ── Assessments ───────────────────────────────────────────────────────────
+
+    scheduleAssessment(applicationId: number, body: CreateAssessmentDto): Observable<AdmissionAssessmentDto> {
+        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/ScheduleAssessment?applicationId=${applicationId}`, body).pipe(map(unwrap));
+    }
+
+    recordAssessmentResult(assessmentId: number, body: RecordAssessmentResultDto): Observable<AdmissionAssessmentDto> {
+        return this.http.post<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/RecordAssessmentResult?assessmentId=${assessmentId}`, body).pipe(map(unwrap));
+    }
+
+    getAssessments(applicationId: number): Observable<AdmissionAssessmentDto[]> {
+        return this.http.get<any>(`${this.baseUrl}/api/services/app/AdmissionApplication/GetAssessments?applicationId=${applicationId}`).pipe(map(unwrap));
+    }
 }
 
 @Injectable()
@@ -369,6 +485,18 @@ export class StudentServiceProxy {
 
     getEnrollmentHistory(studentId: number): Observable<EnrollmentHistoryDto[]> {
         return this.http.get<any>(`${this.baseUrl}/api/services/app/Student/GetEnrollmentHistory?studentId=${studentId}`).pipe(map(unwrap));
+    }
+
+    addGuardian(studentId: number, body: CreateGuardianDto): Observable<StudentGuardianDto> {
+        return this.http.post<any>(`${this.baseUrl}/api/services/app/Student/AddGuardian?studentId=${studentId}`, body).pipe(map(unwrap));
+    }
+
+    removeGuardian(studentGuardianId: number): Observable<void> {
+        return this.http.post<void>(`${this.baseUrl}/api/services/app/Student/RemoveGuardian?studentGuardianId=${studentGuardianId}`, null);
+    }
+
+    getGuardians(studentId: number): Observable<StudentGuardianDto[]> {
+        return this.http.get<any>(`${this.baseUrl}/api/services/app/Student/GetGuardians?studentId=${studentId}`).pipe(map(unwrap));
     }
 }
 

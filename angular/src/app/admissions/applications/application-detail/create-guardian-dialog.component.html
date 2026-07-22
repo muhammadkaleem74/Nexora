@@ -1,0 +1,85 @@
+<form #form="ngForm" (ngSubmit)="save()" autocomplete="off">
+    <abp-modal-header title="Add Guardian" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group required">
+                    <label class="col-form-label">Full Name</label>
+                    <input type="text" class="form-control" name="fullName"
+                        [(ngModel)]="model.fullName" required maxlength="150"
+                        placeholder="e.g. Ahmed Khan" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label">Relationship</label>
+                    <select class="form-control" name="relationship" [(ngModel)]="model.relationship">
+                        <option [value]="1">Father</option>
+                        <option [value]="2">Mother</option>
+                        <option [value]="3">Guardian</option>
+                        <option [value]="4">Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label">Phone</label>
+                    <input type="text" class="form-control" name="phone"
+                        [(ngModel)]="model.phone" maxlength="30"
+                        placeholder="+92 300 0000000" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label">Email</label>
+                    <input type="email" class="form-control" name="email"
+                        [(ngModel)]="model.email" maxlength="150" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label">National ID Number</label>
+                    <input type="text" class="form-control" name="nationalIdNumber"
+                        [(ngModel)]="model.nationalIdNumber" maxlength="50"
+                        placeholder="e.g. 42101-1234567-1" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label">Occupation</label>
+                    <input type="text" class="form-control" name="occupation"
+                        [(ngModel)]="model.occupation" maxlength="100" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">Address</label>
+            <textarea class="form-control" name="address"
+                [(ngModel)]="model.address" rows="2" maxlength="300"></textarea>
+        </div>
+
+        <div class="form-group">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="isPrimaryContact"
+                    name="isPrimaryContact" [(ngModel)]="model.isPrimaryContact" />
+                <label class="form-check-label" for="isPrimaryContact">
+                    Primary Contact
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <abp-modal-footer
+        [cancelDisabled]="saving"
+        [saveDisabled]="!form.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()">
+    </abp-modal-footer>
+</form>
